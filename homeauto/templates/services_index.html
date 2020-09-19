@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static %}
+{% block page %}
+
+
+<div class="row">
+{% for service in services %}
+    <div class="col-md-4">
+        <div class="card mb-2">
+            <div class="card-body">
+               <h5 class="card-title">{{ service.name }}</h5>
+                 <p class="card-text">{{ service.enabled }}</p>
+                 <a href="{% url 'service_detail' service.pk %}" class="btn btn-primary"> More  </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+        <li>Sorry, no services have been setup for this home.</li>
+{% endfor %}
+</div>
+
+{% endblock %}
+

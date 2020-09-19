@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+{% block page %}
+
+<div class='row'>
+    {% for light in lights %}
+    <div class="ol-xs-6 col-sm-3">
+       <div class="card-sm-2">
+            <div class="card-body">
+               {% if light.on %}
+                   <div class="light on">
+               {% else %}
+                   <div class="light off">
+               {% endif %}
+
+
+               {% if light.modelid == "LLC011" %}
+                   <img src="{% static "/images/heroesBloom.svg" %}">
+               {% elif light.modelid == "LCT002" %}
+                   <img src="{% static "/images/bulbFlood.svg" %}">
+               {% elif light.modelid == "LST002" %}
+                   <img src="{% static "/images/heroesLightstrip.svg" %}">
+               {% elif light.modelid == "LCT007" %}
+                   <img src="{% static "/images/bulbsClassic.svg" %}">
+               {% elif light.modelid == "LWB014" %}
+                   <img src="{% static "/images/bulbsClassic.svg" %}">
+               {% elif light.modelid == "LCT003" %}
+                   <img src="{% static "/images/bulbsSpot.svg" %}">
+
+               {% endif %}
+               {{ light.name }}
+                </div>
+
+            </div>
+        </div>
+    </div>
+    {% empty %}
+        <li>Sorry, no people have been setup for this home.</li>
+{% endfor %}
+</div>
+{% endblock %}
+

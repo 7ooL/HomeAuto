@@ -1,0 +1,9 @@
+[submodule "homeauto/api_vivint"]
+	path = homeauto/api_vivint
+	url = git@github.com:7ooL/api_vivint.git
+[submodule "homeauto/api_decora"]
+	path = homeauto/api_decora
+	url = git@github.com:7ooL/api_decora.git
+[submodule "homeauto/api_infinitude"]
+	path = homeauto/api_infinitude
+	url = git@github.com:7ooL/api_infinitude.git

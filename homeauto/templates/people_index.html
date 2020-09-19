@@ -1,0 +1,29 @@
+
+{% extends "base.html" %}
+{% load static %}
+{% block page %}
+
+
+<div class="row">
+{% for person in persons %}
+    {% if person.always_visible or person.is_home %}
+        <div class="col-md-4">
+            <div class="card mb-2">
+                <div class="card-body">
+                   <h5 class="card-title">{{ person.first_name }}</h5>
+                   <p class="card-text">{{ person.is_home }}</p>
+                   <a href="{% url 'person_detail' person.pk %}"
+                      class="btn btn-primary">
+                    More
+                   </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% empty %}
+        <li>Sorry, no people have been setup for this home.</li>
+{% endfor %}
+</div>
+
+{% endblock %}
+

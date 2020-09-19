@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load static %}
+{% block page %}
+<h1>{{ person.title }}</h1>
+<div class="row">
+    <div class="col-md-4">
+	<h5>Name:</h5>
+        <p>{{ person.first_name }} {{ person.last_name }}</p>
+        <h5>Phone:</h5>
+        <p>{{ person.phone }}</p>
+        <h5>Currently Home:</h5>
+        <p>{{ person.is_home }}</p>
+        <h5>Currently Home:</h5>
+        <p>{{ person.is_home }}</p>
+    </div>
+</div>
+{% endblock %}
