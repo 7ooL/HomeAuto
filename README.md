@@ -12,16 +12,18 @@ Automation is achieved in two main ways.
 2)	Nugget firing.
 
 ## Jobs
-First, jobs can be scheduled to do things on a regular basis. There are a number of predinfed jobs for example that update devices status and look for new devices. Each job can be fine tuned to run at its own frequency. 
+First, jobs can be scheduled to do things on a regular basis. There are a number of pre-defined jobs, for example, many that update devices status and look for new devices. Each job can be fine tuned to run at its own frequency depending on what makes sense. Syncing light states from Hue devices is more important than checking if new groups have been defined. 
 
 ![Image of Jobs](https://github.com/7ooL/HomeAuto/blob/master/images/add_job.png)
 
 ## Nuggets
-Nuggets are made up of Triggers and Actions.  When all the Triggers in a Nugget are TRUE then its Actions will be executed. Its this frame work that allows for the expansion of automation through a web interface. 
+Nuggets are made up of Triggers and Actions. When all the Triggers in a Nugget are TRUE then its Actions will be executed. Its this framework that allows for the expansion of automation through a web interface. 
+
+![Image of Nugget](https://github.com/7ooL/HomeAuto/blob/master/images/nugget.png)
 
 ### Triggers
 Triggers become TRUE when certain events occur. For example when it’s a specific time, when a door is opened, or when motion is detected. 
-Once a Trigger is defined it can be used in multiple Nuggets, or even combine with other Triggers in a Nugget. 
+Once a Trigger is defined it can be used in multiple Nuggets, or even combined with other Triggers in a Nugget. 
 
 ![Image of Triggers](https://github.com/7ooL/HomeAuto/blob/master/images/triggers.png)
 
