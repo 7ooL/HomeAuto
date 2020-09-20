@@ -6,7 +6,7 @@ While these scripts work just fine and they do not take kindly to updates. Updat
 
 # HomeAuto
 This is a Django based application that makes used of the admin site to administer all aspects of this home automation program.  
-Automation is achieved in to main ways.
+Automation is achieved in two main ways.
 
 1)	Scheduled Jobs 
 2)	Nugget firing.
