@@ -6,44 +6,44 @@ from datetime import datetime
 import subprocess
 import logging
 
-from homeauto.house import RegisterMotionEvent, putCommand
+from homeauto.house import register_motion_event, put_command
 
 
 # This retrieves a Python logging instance (or creates it)
 logger = logging.getLogger(__name__)
 
-def turnOnLight(light):
+def turn_on_light(light):
     api_url='http://'+light.bridge.ip+'/api/'+light.bridge.username+'/lights/'+str(light.id)+'/state'
     payload = {'on': True,'transitiontime': 100}
-    putCommand(api_url, payload)
+    put_command(api_url, payload)
 
-def turnOffLight(light):
+def turn_off_light(light):
     api_url='http://'+light.bridge.ip+'/api/'+light.bridge.username+'/lights/'+str(light.id)+'/state'
     payload = {'on': False,'transitiontime': 100}
-    putCommand(api_url, payload)
+    put_command(api_url, payload)
 
-def turnOffGroup(group):
+def turn_off_group(group):
     api_url='http://'+group.bridge.ip+'/api/'+group.bridge.username+'/groups/'+str(group.id)+'/action'
     payload = {'on': False,'transitiontime': 100}
-    putCommand(api_url, payload)
+    put_command(api_url, payload)
 
-def turnOnGroup(group):
+def turn_on_group(group):
     # dealing with all lights, use group 0
     api_url='http://'+group.bridge.ip+'/api/'+group.bridge.username+'/groups/'+str(group.id)+'/action'
     payload = {'on': True,'transitiontime': 100}
-    putCommand(api_url, payload)
+    put_command(api_url, payload)
 
-def blinkGroup (group):
+def blink_group (group):
     api_url='http://'+group.bridge.ip+'/api/'+group.bridge.username+'/groups/'+str(group.id)+'/action'
     payload = {'on': True, 'alert': "select"}
-    putCommand(api_url, payload)
+    put_command(api_url, payload)
 
-def playScene(scene):
+def play_scene(scene):
     api_url='http://'+scene.bridge.ip+'/api/'+scene.bridge.username+'/groups/'+str(scene.group.id)+'/action'
     payload = {'scene': scene.id}
-    putCommand(api_url, payload)
+    put_command(api_url, payload)
 
-def SyncGroups():
+def sync_groups():
     logger.debug("Syncing Hue Groups" )
     all_bridges = Bridge.objects.all()
     for bridge in all_bridges:
@@ -116,7 +116,7 @@ def SyncGroups():
                  logger.debug("Adding light "+str(l)+" to group: "+str(g))
                  g.lights.add(l)
 
-def SyncLights():
+def sync_lights():
     logger.debug("Syncing Hue Lights" )
     all_bridges = Bridge.objects.all()
     for bridge in all_bridges:
@@ -170,7 +170,7 @@ def SyncLights():
 
 
 
-def SyncSensors():
+def sync_sensors():
     logger.debug("Syncing Hue Sensors" )
     all_bridges = Bridge.objects.all()
     for bridge in all_bridges:
@@ -215,7 +215,7 @@ def SyncSensors():
                          data['presence']=sensors[sensor]['state']['presence']
                          if data['presence']:
                              logger.debug(data['name']+" detected motion")
-                             RegisterMotionEvent("Hue", sensor)
+                             register_motion_event("Hue", sensor)
 
                      # config
                      if "on" in sensors[sensor]['config']:
@@ -255,7 +255,7 @@ def SyncSensors():
 
 
 
-def SyncScenes():
+def sync_scenes():
     logger.debug("Syncing Hue Scenes" )
     all_bridges = Bridge.objects.all()
     for bridge in all_bridges:
@@ -340,7 +340,7 @@ def SyncScenes():
 
 
 # schedules
-def SyncSchedules():
+def sync_schedules():
     logger.debug("Syncing Hue Schedules" )
     all_bridges = Bridge.objects.all()
     for bridge in all_bridges:

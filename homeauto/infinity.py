@@ -2,10 +2,9 @@ from django.conf import settings
 from django.utils import timezone
 from datetime import datetime
 
-
-from homeauto.api_infinitude.pyInfinitude import infinitude
+from homeauto.api_infinitude.pyInfinitude import Infinitude
 from homeauto.models.infinity import Infinity, InfStatus, InfProfile, InfActivity
-from homeauto.house import  RegisterHvacEvent
+from homeauto.house import  register_hvac_event
 
 import logging
 # This retrieves a Python logging instance (or creates it)
@@ -13,90 +12,90 @@ logger = logging.getLogger(__name__)
 
 
 
-def CheckForStatusEvents(currentStatus, data):
+def check_for_status_events(currentStatus, data):
     update = False
     if currentStatus.rt != data['rt']:
-        RegisterHvacEvent(currentStatus.infinity.name, 'relative temperature', currentStatus.rt, data['rt'] )
+        register_hvac_event(currentStatus.infinity.name, 'relative temperature', currentStatus.rt, data['rt'] )
         update = True
     if currentStatus.rh != data['rh']:
-        RegisterHvacEvent(currentStatus.infinity.name, 'relative humidity', currentStatus.rh, data['rh'] )
+        register_hvac_event(currentStatus.infinity.name, 'relative humidity', currentStatus.rh, data['rh'] )
         update = True
     if currentStatus.current_activity != data['current_activity']:
-        RegisterHvacEvent(currentStatus.infinity.name, 'current activity', currentStatus.current_activity, data['current_activity'] )
+        register_hvac_event(currentStatus.infinity.name, 'current activity', currentStatus.current_activity, data['current_activity'] )
         update = True
     if currentStatus.htsp != data['htsp']:
-        RegisterHvacEvent(currentStatus.infinity.name, 'htsp', currentStatus.htsp, data['htsp'] )
+        register_hvac_event(currentStatus.infinity.name, 'htsp', currentStatus.htsp, data['htsp'] )
         update = True
     if currentStatus.clsp != data['clsp']:
-        RegisterHvacEvent(currentStatus.infinity.name, 'clsp', currentStatus.clsp, data['clsp'] )
+        register_hvac_event(currentStatus.infinity.name, 'clsp', currentStatus.clsp, data['clsp'] )
         update = True
     if currentStatus.fan != data['fan']:
-        RegisterHvacEvent(currentStatus.infinity.name, 'fan', currentStatus.fan, data['fan'] )
+        register_hvac_event(currentStatus.infinity.name, 'fan', currentStatus.fan, data['fan'] )
         update = True
     if currentStatus.hold != data['hold']:
-        RegisterHvacEvent(currentStatus.infinity.name, 'hold', currentStatus.hold, data['hold'] )
+        register_hvac_event(currentStatus.infinity.name, 'hold', currentStatus.hold, data['hold'] )
         update = True
     if currentStatus.hold_time != data['hold_time']:
-        RegisterHvacEvent(currentStatus.infinity.name, 'hold_time', currentStatus.hold_time, data['hold_time'] )
+        register_hvac_event(currentStatus.infinity.name, 'hold_time', currentStatus.hold_time, data['hold_time'] )
         update = True
     if currentStatus.vaca_running != data['vaca_running']:
-        RegisterHvacEvent(currentStatus.infinity.name, 'vaca_running', currentStatus.vaca_running, data['vaca_running'] )
+        register_hvac_event(currentStatus.infinity.name, 'vaca_running', currentStatus.vaca_running, data['vaca_running'] )
         update = True
     if currentStatus.heat_mode != data['heat_mode']:
-        RegisterHvacEvent(currentStatus.infinity.name, 'heat_mode', currentStatus.heat_mode, data['heat_mode'] )
+        register_hvac_event(currentStatus.infinity.name, 'heat_mode', currentStatus.heat_mode, data['heat_mode'] )
         update = True
     if currentStatus.temp_unit != data['temp_unit']:
-        RegisterHvacEvent(currentStatus.infinity.name, 'temp_unit', currentStatus.temp_unit, data['temp_unit'] )
+        register_hvac_event(currentStatus.infinity.name, 'temp_unit', currentStatus.temp_unit, data['temp_unit'] )
         update = True
     if currentStatus.filtrlvl != data['filtrlvl']:
-        RegisterHvacEvent(currentStatus.infinity.name, 'filtrlvl', currentStatus.filtrlvl, data['filtrlvl'] )
+        register_hvac_event(currentStatus.infinity.name, 'filtrlvl', currentStatus.filtrlvl, data['filtrlvl'] )
         update = True
     if currentStatus.humlvl != data['humlvl']:
-        RegisterHvacEvent(currentStatus.infinity.name, 'humlvl', currentStatus.humlvl, data['humlvl'] )
+        register_hvac_event(currentStatus.infinity.name, 'humlvl', currentStatus.humlvl, data['humlvl'] )
         update = True
     if currentStatus.humid != data['humid']:
-        RegisterHvacEvent(currentStatus.infinity.name, 'humid', currentStatus.humid, data['humid'] )
+        register_hvac_event(currentStatus.infinity.name, 'humid', currentStatus.humid, data['humid'] )
         update = True
     return update
 
 
-def CheckForProfileEvents(currentProfile, data):
+def check_for_profile_events(currentProfile, data):
     update = False
     if currentProfile.name != data['name']:
-        RegisterHvacEvent(currentProfile.infinity.name, 'name', currentProfile.name, data['name'])
+        register_hvac_event(currentProfile.infinity.name, 'name', currentProfile.name, data['name'])
         update = True
     if currentProfile.clsp != data['clsp']:
-        RegisterHvacEvent(currentProfile.infinity.name, 'clsp', currentProfile.clsp, data['clsp'])
+        register_hvac_event(currentProfile.infinity.name, 'clsp', currentProfile.clsp, data['clsp'])
         update = True
     if currentProfile.htsp != data['htsp']:
-        RegisterHvacEvent(currentProfile.infinity.name, 'htsp', currentProfile.htsp, data['htsp'])
+        register_hvac_event(currentProfile.infinity.name, 'htsp', currentProfile.htsp, data['htsp'])
         update = True
     if currentProfile.fan != data['fan']:
-        RegisterHvacEvent(currentProfile.infinity.name, 'fan', currentProfile.fan, data['fan'])
+        register_hvac_event(currentProfile.infinity.name, 'fan', currentProfile.fan, data['fan'])
         update = True
     return update
 
-def CheckForActivityEvents(currentActivity, data):
+def check_for_activity_events(currentActivity, data):
     update = False
     if currentActivity.time != data['time']:
-        RegisterHvacEvent(currentActivity.infinity.name, 'time', currentActivity.time, data['time'])
+        register_hvac_event(currentActivity.infinity.name, 'time', currentActivity.time, data['time'])
         update = True
     if currentActivity.activity != data['activity']:
-        RegisterHvacEvent(currentActivity.infinity.name, 'activity', currentActivity.activity, data['activity'])
+        register_hvac_event(currentActivity.infinity.name, 'activity', currentActivity.activity, data['activity'])
         update = True
     if currentActivity.day != data['day']:
-        RegisterHvacEvent(currentActivity.infinity.name, 'day', currentActivity.day, data['day'])
+        register_hvac_event(currentActivity.infinity.name, 'day', currentActivity.day, data['day'])
         update = True
     if currentActivity.period != data['period']:
-        RegisterHvacEvent(currentActivity.infinity.name, 'period', currentActivity.period, data['period'])
+        register_hvac_event(currentActivity.infinity.name, 'period', currentActivity.period, data['period'])
         update = True
     if currentActivity.enabled != data['enabled']:
-        RegisterHvacEvent(currentActivity.infinity.name, 'enabled', currentActivity.enabled, data['enabled'])
+        register_hvac_event(currentActivity.infinity.name, 'enabled', currentActivity.enabled, data['enabled'])
         update = True
     return update
 
 
-def SyncInfinity():
+def sync_infinity():
     all_infinity = Infinity.objects.all()
     if all_infinity.exists():
         for infinity in all_infinity:
@@ -107,10 +106,10 @@ def SyncInfinity():
                 hvacPort = infinity.port
                 hvacFile = "homeauto/api_infinitude/"+str(hvacIP)+"_"+str(hvacPort)+"-file.json"
                 hvacStatus = "homeauto/api_infinitude/"+str(hvacIP)+"_"+str(hvacPort)+"-status.json"
-                hvac = infinitude(hvacIP,hvacPort,hvacFile, hvacStatus)
+                hvac = Infinitude(hvacIP,hvacPort,hvacFile, hvacStatus)
 
-                if not hvac.pullStatus():
-                    logger.error("pullStatus failed")
+                if not hvac.pull_status():
+                    logger.error("pull_status failed")
                 else:
                     data = {}
 
@@ -119,7 +118,7 @@ def SyncInfinity():
                     data['mode'] = hvac.get_mode();
                     if current_mode != data['mode']:
                         Infinity.objects.filter(name=infinity.name).update(**data)
-                        RegisterHvacEvent(infinity.name, 'mode',current_mode,data['mode'])
+                        register_hvac_event(infinity.name, 'mode',current_mode,data['mode'])
 
                     data = {}
                     data['infinity'] = infinity
@@ -170,15 +169,15 @@ def SyncInfinity():
                     # otherwise update the InfStatus
                     else:
                         currentStatus = InfStatus.objects.get(infinity=infinity)
-                        if CheckForStatusEvents(currentStatus, data):
+                        if check_for_status_events(currentStatus, data):
                             logger.debug("Updating status for "+infinity.name)
                             InfStatus.objects.filter(infinity=infinity).update(**data)
 
 
-                if not hvac.pullConfig():
-                    logger.error("pullConfig failed")
+                if not hvac.pull_config():
+                    logger.error("pull_config failed")
                 else:
-                    # adjust days of week num to align with carrier and infinitude numbering
+                    # adjust days of week num to align with carrier and Infinitude numbering
                     for day in range(0,7):
                           for period in range(0,5):
                               data = {}
@@ -200,7 +199,7 @@ def SyncInfinity():
                               # otherwise update the InfActivity
                               else:
                                   currentActivity = InfActivity.objects.get(day=day, period=period, infinity=infinity)
-                                  if CheckForActivityEvents(currentActivity, data):
+                                  if check_for_activity_events(currentActivity, data):
                                       logger.debug("Updating "+data['activity']+" for "+infinity.name)
                                       InfActivity.objects.filter(day=day, period=period, infinity=infinity).update(**data)
 
@@ -222,7 +221,7 @@ def SyncInfinity():
                         # otherwise update the InfProfile
                         else:
                             currentProfile = InfProfile.objects.get(infinity=infinity, name=data['name'])
-                            if CheckForProfileEvents(currentProfile,data):
+                            if check_for_profile_events(currentProfile,data):
                                 logger.debug("Updating "+data['name']+" profile for "+infinity.name)
                                 InfProfile.objects.filter(infinity=infinity, name=data['name']).update(**data)
 
@@ -242,7 +241,7 @@ def SyncInfinity():
                     # otherwise update the InfProfile
                     else:
                         currentProfile = InfProfile.objects.get(infinity=infinity, name=data['name'])
-                        if CheckForProfileEvents(currentProfile,data):
+                        if check_for_profile_events(currentProfile,data):
                             logger.debug("Updating "+data['name']+" profile for "+infinity.name)
                             InfProfile.objects.filter(infinity=infinity, name=data['name']).update(**data)
 

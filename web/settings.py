@@ -22,22 +22,23 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {
+        'simple': {
 #            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
             '()': 'djangocolors_formatter.DjangoColorsFormatter',
-            'format': '{asctime}-{levelname}:{module}.{funcName}: {message}',
+            'format': '{levelname}:{module}:{funcName}: {message}',
             'style': '{',
         },
-        'simple': {
+        'verbose': {
 #            'format': '{levelname} {message}',
-            'format': '{asctime}-{levelname}:{module}.{funcName}: {message}',
+#            '()': 'djangocolors_formatter.DjangoColorsFormatter',
+            'format': '{asctime}-{levelname}:{filename}:{module}:{funcName}: {message}',
             'style': '{',
         },
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
+            'formatter': 'simple',
         },
         'file': {
            'class': 'logging.FileHandler',
@@ -47,58 +48,58 @@ LOGGING = {
     },
     'loggers': {
 #        'django': {
-#            'handlers': ['console'],
+#            'handlers': ['console', 'file'],
 #            'level': 'DEBUG',
 #            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
 #        },
 #        'homeauto.apps': {
-#            'handlers': ['console', 'file'],
+#            'handlers': ['console', 'file', 'file'],
 #            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
 #            'level': 'DEBUG',
 
 #        },
         'django.server': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
         },
         'homeauto.house': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'DEBUG',
         },
         'homeauto.models': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'DEBUG',
         },
         'homeauto.vivint': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
         },
         'homeauto.api_vivint': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
         },
         'homeauto.jobs': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
         },
         'homeauto.wemo': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
         },
         'homeauto.hue': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
         },
         'homeauto.decora': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
         },
         'homeauto.infinity': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'DEBUG',
         },
         'homeauto.api_infinitude.pyInfinitude': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
         },
 #        'homeauto': {
@@ -106,7 +107,7 @@ LOGGING = {
 #            'level': 'DEBUG',
 #        },
 #        'apscheduler': {
-#            'handlers': ['console'],
+#            'handlers': ['console', 'file'],
 #            'level': 'DEBUG',
 #            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
 #        },
@@ -123,7 +124,8 @@ ALLOWED_HOSTS = secret.ALLOWED_HOSTS
 INSTALLED_APPS = [
 #    'homeauto.apps.AppAdminConfig',
     'admin_reorder',
-    'homeauto.apps.config',
+    'homeauto.apps.Config',
+#    'homeauto.api_decora.decora_wifi',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

@@ -7,7 +7,7 @@ import logging
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-class config(AppConfig):
+class Config(AppConfig):
     name = 'homeauto'
 
     if 'runserver' in sys.argv:

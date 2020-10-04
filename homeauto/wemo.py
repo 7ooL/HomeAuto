@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def turnOnLight(device):
+def turn_on_light(device):
     if device.enabled:
         if not device.status:
             cmd = '/usr/local/bin/wemo switch "'+device.name+ '" on'
@@ -20,7 +20,7 @@ def turnOnLight(device):
     else:
         logger.warning('device '+device.name+'('+str(device.id)+') not enabled')
 
-def turnOffLight(device):
+def turn_off_light(device):
     if device.enabled:
         if not device.status:
             cmd = '/usr/local/bin/wemo switch "'+device.name+ '" off'
@@ -33,7 +33,7 @@ def turnOffLight(device):
         logger.warning('device '+device.name+'('+str(device.id)+') not enabled')
 
 
-def SyncWemo():
+def sync_wemo():
     # get Wemo account
     from distutils.spawn import find_executable
 

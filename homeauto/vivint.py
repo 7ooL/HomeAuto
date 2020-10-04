@@ -33,7 +33,7 @@ def start():
         logger.error("Cannot coonect to Vivint because no Account information for "+ACCT_NAME+" exist")
 
 
-def SyncVivintSensors():
+def sync_vivint_sensors():
 
     warnings.filterwarnings("ignore")
     if Account.objects.filter(name=ACCT_NAME).exists():

@@ -92,7 +92,7 @@ class Job(models.Model):
 #    def save(self, *args, **kwargs):
 #        test = self
 #        super(Job, self).save(*args, **kwargs)
-#        jobs.createJobs(test)
+#        jobs.create_jobs(test)
 #        logger.debug("Running create job for "+self.COMMAND_TYPES[self.command+1][1])
 #        if self.enabled:
 #            if self.command == 0:

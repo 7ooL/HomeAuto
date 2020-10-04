@@ -16,10 +16,10 @@ logger = logging.getLogger(__name__)
 ACCT_NAME = 'Decora'
 
 
-def turnOnLight(switch):
+def turn_on_light(switch):
     decora(switch.name,'ON','None')
 
-def turnOffLight(switch):
+def turn_off_light(switch):
     decora(switch.name,'ON','None')
 
 
@@ -58,7 +58,7 @@ def decora(switch_name, command, brightness):
 
 
 
-def SyncDecora():
+def sync_decora():
     # get decora account 
     if Account.objects.filter(name=ACCT_NAME).exists():
         logger.debug("Account name "+ACCT_NAME+" exists")

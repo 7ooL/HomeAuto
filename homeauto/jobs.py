@@ -38,15 +38,15 @@ def start():
         scheduler.start()
 
     for job in Job.objects.all():
-        reviewJob(job)
+        review_job(job)
 
-def reviewJob(job):
+def review_job(job):
     logger.debug("Running create job for "+job.COMMAND_TYPES[job.command+1][1])
     existingJob = scheduler.get_job(job.COMMAND_TYPES[job.command+1][1])
     if existingJob is not None:
         if job.enabled:
             if existingJob.next_run_time is None:
-                createJob(job)
+                create_job(job)
             else:
                 interval_minutes = int(job.interval/60)
                 interval = re.search('interval\[(.*)\]', str(existingJob.trigger)).group(1)
@@ -57,13 +57,13 @@ def reviewJob(job):
                     logger.debug("check interval is < 60: "+str(job.interval))
                     if int(interval[2]) != int(job.interval) :
                         logger.debug(str(interval[2])+" != "+str(job.interval))
-                        createJob(job)
+                        create_job(job)
                 # minutes
                 elif interval_minutes <= 60:
                     logger.debug("check interval is <= 60 minutes: "+str(interval_minutes))
                     if int(interval[1]) != int(interval_minutes) :
                         logger.debug(str(interval[1])+" != "+str(interval_minutes))
-                        createJob(job)
+                        create_job(job)
 
         else:
             if existingJob.next_run_time is not None:
@@ -77,10 +77,10 @@ def reviewJob(job):
                 except:
                     logger.debug("No scheduler for job "+job.COMMAND_TYPES[job.command+1][1])
     else:
-        createJob(job)
+        create_job(job)
 
 
-def createJob(job):
+def create_job(job):
     if scheduler.get_job(job.COMMAND_TYPES[job.command+1][1]):
         scheduler.reschedule_job(job.COMMAND_TYPES[job.command+1][1],trigger='interval',seconds=job.interval)
         existingJob = scheduler.get_job(job.COMMAND_TYPES[job.command+1][1])
@@ -90,21 +90,21 @@ def createJob(job):
         if job.command == 0:
             scheduler.add_job(dropbox_job,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
         elif job.command == 1:
-            scheduler.add_job(WemoJobs.SyncWemo,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
+            scheduler.add_job(WemoJobs.sync_wemo,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
         elif job.command == 2:
-            scheduler.add_job(DecoraJobs.SyncDecora,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
+            scheduler.add_job(DecoraJobs.sync_decora,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
         elif job.command == 3:
-            scheduler.add_job(VivintJobs.SyncVivintSensors,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
+            scheduler.add_job(VivintJobs.sync_vivint_sensors,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
         elif job.command == 4:
-            scheduler.add_job(HueJobs.SyncGroups,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
+            scheduler.add_job(HueJobs.sync_groups,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
         elif job.command == 5:
-            scheduler.add_job(HueJobs.SyncLights,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
+            scheduler.add_job(HueJobs.sync_lights,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
         elif job.command == 6:
-            scheduler.add_job(HueJobs.SyncScenes,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
+            scheduler.add_job(HueJobs.sync_scenes,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
         elif job.command == 7:
-            scheduler.add_job(HueJobs.SyncSensors,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
+            scheduler.add_job(HueJobs.sync_sensors,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
         elif job.command == 8:
-            scheduler.add_job(HueJobs.SyncSchedules,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
+            scheduler.add_job(HueJobs.sync_schedules,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
         elif job.command == 9:
             scheduler.add_job(find_motion_detectors_job,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
         elif job.command == 10:
@@ -116,7 +116,7 @@ def createJob(job):
         elif job.command == 13:
             scheduler.add_job(find_sensors_job,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
         elif job.command == 14:
-            scheduler.add_job(InfinityJobs.SyncInfinity,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
+            scheduler.add_job(InfinityJobs.sync_infinity,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
         else:
             logger.warning("No job has been created for command: "+job.COMMAND_TYPES[job.command+1][1])
 
