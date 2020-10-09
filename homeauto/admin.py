@@ -62,6 +62,12 @@ class HouseSensorAdmin(admin.ModelAdmin):
     pass
 admin.site.register(house.HouseSensor, HouseSensorAdmin)
 
+class HouseScheduleAdmin(admin.ModelAdmin):
+    list_display = ('name', 'id','enabled', 'source', 'source_type','source_id')
+    list_filter = ('source', 'source_type')
+    pass
+admin.site.register(house.HouseSchedule, HouseScheduleAdmin)
+
 
 
 
@@ -73,7 +79,7 @@ def view(request):
     return render(request, 'trigger_edit.html', form=form)
 
 class TriggerAdmin(admin.ModelAdmin):
-    list_display = ('name', 'enabled', 'trigger')
+    list_display = ('name', 'enabled', 'trigger', 'id')
     change_form_template = 'trigger_edit.html'
     pass
 admin.site.register(house.Trigger, TriggerAdmin)

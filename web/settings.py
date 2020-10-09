@@ -68,7 +68,7 @@ LOGGING = {
         },
         'homeauto.models': {
             'handlers': ['console', 'file'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
         'homeauto.vivint': {
             'handlers': ['console', 'file'],
@@ -96,7 +96,7 @@ LOGGING = {
         },
         'homeauto.infinity': {
             'handlers': ['console', 'file'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
         'homeauto.api_infinitude.pyInfinitude': {
             'handlers': ['console', 'file'],
@@ -205,6 +205,7 @@ ADMIN_REORDER = (
        {'model': 'homeauto.HouseLight','label': 'House Lights'},
        {'model': 'homeauto.HouseLock','label': 'House Locks'},
        {'model': 'homeauto.HouseSensor','label': 'House Sensors'},
+       {'model': 'homeauto.HouseSchedule','label': 'House Schedules'},
     )},
 
     {'app': 'homeauto', 'label': 'House Configuations', 'models': (
@@ -226,6 +227,7 @@ ADMIN_REORDER = (
        {'model': 'homeauto.Group', 'label': 'Hue Groups'},
        {'model': 'homeauto.Scene', 'label': 'Hue Scenes'},
        {'model': 'homeauto.Sensor', 'label': 'Hue Sensors'},
+       {'model': 'homeauto.Schedule', 'label': 'Hue Schedules'},
        {'model': 'homeauto.Device', 'label': 'Vivint Devices'},
        {'model': 'homeauto.Panel', 'label': 'Vivint Panels'},
     )},

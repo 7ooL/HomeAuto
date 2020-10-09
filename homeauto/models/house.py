@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 class Common(models.Model):
     SOURCE = ((-1,"------"),(0,"Vivint"),(1, "Hue"),(2,"Wemo"),(3,"Decora"))
-    SOURCE_TYPE = ((-1,"------"),(0,"Bulb"),(1, "Group"),(2,"Scene"),(3,"Switch"),(4,"Plug"),(5,"Sensor"),(6,"Lock"),(7,"Motion Detector"))
+    SOURCE_TYPE = ((-1,"------"),(0,"Bulb"),(1, "Group"),(2,"Scene"),(3,"Switch"),(4,"Plug"),(5,"Sensor"),(6,"Lock"),(7,"Motion Detector"), (8,"External Schedule"))
 
     DISARMED = 'disarmed'
     ARMED_STAY = 'armed_stay'
@@ -78,12 +78,13 @@ class Job(models.Model):
         (6,'Hue Scenes Pull and DB Update'),
         (7,'Hue Sensors Pull and DB Update'),
         (8,'Hue Schedules Pull and DB Update'),
-        (9,'Find Motion Detectors in Devices'),
+        (9,'Find House Motion Detectors in Devices'),
         (10,'Find House Lights in Devices'),
         (11,'Evaluate Time Based Triggers'),
         (12,'Find House Locks in Devices'),
         (13,'Find House Sensors in Devices'),
-        (14,'Infinity System Pull DB Update'),
+        (14,'Infinity Pull DB Update'),
+        (15,'Find House Schedules in Devices'),
     )
     command = models.IntegerField(choices=COMMAND_TYPES, default='')
     interval = models.IntegerField(default=600,validators=[MinValueValidator(0),MaxValueValidator(3600)] )
@@ -147,9 +148,14 @@ class HouseSensor(Common):
     source_type = models.IntegerField(choices=Common.SOURCE_TYPE, default=-1)
     source_id = models.IntegerField(default=-1)
 
+class HouseSchedule(Common):
+    source = models.IntegerField(choices=Common.SOURCE, default=-1)
+    source_type = models.IntegerField(choices=Common.SOURCE_TYPE, default=-1)
+    source_id = models.IntegerField(default=-1)
+
 class Trigger(Common):
     MOTION = 'Motion'
-    SCHEDULE = 'Specific Time'
+    SCHEDULE = 'External Schedule Start'
     WINDOW ='Time Window'
     SENSOR_OPENED = 'Sensor Opened'
     SENSOR_CLOSED = 'Sensor Closed'
@@ -196,7 +202,7 @@ class Trigger(Common):
     lock = models.OneToOneField(HouseLock, on_delete=models.CASCADE, blank=True, null=True)
     window_start = models.TimeField(default=timezone.now)
     window_end = models.TimeField(default=timezone.now)
-    schedule_start = models.TimeField(default=timezone.now)
+    external_schedule =  models.OneToOneField(HouseSchedule, on_delete=models.CASCADE, blank=True, null=True)
     people =  models.ManyToManyField(Person, blank=True)
     armed_state =  models.CharField(max_length=60,choices=Common.ARM_STATES, default=Common.DISARMED)
     hvac_unit = models.ManyToManyField(Infinity, blank=True)

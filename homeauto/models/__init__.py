@@ -6,6 +6,7 @@ from .house import HouseMotionDetector
 from .house import HouseLight
 from .house import HouseLock
 from .house import HouseSensor
+from .house import HouseSchedule
 from .house import Action
 from .house import Nugget
 from .house import Trigger
@@ -22,6 +23,7 @@ from .hue import Light
 from .hue import Group
 from .hue import SceneLightstate
 from .hue import Scene
+from .hue import Schedule
 
 from .infinity import Infinity
 from .infinity import InfStatus

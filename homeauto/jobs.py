@@ -9,8 +9,8 @@ import apscheduler.job
 import re
 from datetime import datetime
 
-from homeauto.models.house import Job, HouseMotionDetector, HouseLight, HouseLock, HouseSensor, Trigger
-from homeauto.models.hue import Sensor, Light, Group, Scene
+from homeauto.models.house import Job, HouseMotionDetector, HouseLight, HouseLock, HouseSensor, Trigger, HouseSchedule
+from homeauto.models.hue import Sensor, Light, Group, Scene, Schedule
 from homeauto.models.wemo import Wemo
 from homeauto.models.decora import Switch
 from homeauto.models.vivint import Device
@@ -41,11 +41,13 @@ def start():
         review_job(job)
 
 def review_job(job):
-    logger.debug("Running create job for "+job.COMMAND_TYPES[job.command+1][1])
+    logger.debug("Reviewing job "+job.COMMAND_TYPES[job.command+1][1])
     existingJob = scheduler.get_job(job.COMMAND_TYPES[job.command+1][1])
     if existingJob is not None:
+        logger.debug("    "+existingJob.name)
         if job.enabled:
             if existingJob.next_run_time is None:
+                logger.debug("Running create job for "+job.COMMAND_TYPES[job.command+1][1])
                 create_job(job)
             else:
                 interval_minutes = int(job.interval/60)
@@ -77,6 +79,7 @@ def review_job(job):
                 except:
                     logger.debug("No scheduler for job "+job.COMMAND_TYPES[job.command+1][1])
     else:
+        logger.debug("Running create job for "+job.COMMAND_TYPES[job.command+1][1])
         create_job(job)
 
 
@@ -110,13 +113,15 @@ def create_job(job):
         elif job.command == 10:
             scheduler.add_job(find_lights_job,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
         elif job.command == 11:
-            scheduler.add_job(HouseJobs.check_trigger_windows,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
+            scheduler.add_job(HouseJobs.check_time_triggers,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
         elif job.command == 12:
             scheduler.add_job(find_locks_job,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
         elif job.command == 13:
             scheduler.add_job(find_sensors_job,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
         elif job.command == 14:
             scheduler.add_job(InfinityJobs.sync_infinity,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
+        elif job.command == 15:
+            scheduler.add_job(find_schedules_job,'interval', seconds=job.interval, id=job.COMMAND_TYPES[job.command+1][1], max_instances=1, replace_existing=True, coalesce=True)
         else:
             logger.warning("No job has been created for command: "+job.COMMAND_TYPES[job.command+1][1])
 
@@ -136,6 +141,20 @@ def dropbox_job():
     else:
         logger.warning("Service: "+name+" isn't running")
         os.system(command)
+
+def find_schedules_job():
+    for s in Schedule.objects.filter(enabled=True):
+        try:
+            HouseSchedule.objects.get(source_id=s.id, source=1, source_type=8)
+        except ObjectDoesNotExist:
+            data = {}
+            data['name'] = "Hue: "+s.name
+            data['source'] = 1
+            data['source_type'] = 8
+            data['source_id'] = s.id
+            x = HouseSchedule.objects.create(**data)
+            x.save()
+            logger.info("Found new schedule: "+data['name'])
 
 def find_sensors_job():
     for s in Device.objects.filter(enabled=True, type='wireless_sensor', motion_detector=False):

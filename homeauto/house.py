@@ -1,8 +1,14 @@
-import logging
-import requests, json, smtplib
+
+
+
+
+
+
+
+import logging, requests, json, smtplib, datetime
 from django.utils import timezone
 
-from homeauto.models.hue import Sensor, Scene, Light, Group
+from homeauto.models.hue import Sensor, Scene, Light, Group, Schedule
 from homeauto.models.wemo import Wemo
 from homeauto.models.decora import Switch
 from homeauto.models.vivint import Device, Panel
@@ -24,20 +30,22 @@ logger = logging.getLogger(__name__)
 #def register_signal_event(sender, instance, **kwargs):
 #    logger.error("recieved signal!!!")
 
+globalMorning = ''
+
 def register_motion_event(source, device_id):
     if "Hue" in source:
         m = Sensor.objects.get(id=device_id)
     elif "Vivint" in source:
         m = Device.objects.get(id=device_id)
-    logger.debug(source+" "+m.name+"("+str(m.id)+") Motion Detected")
+    logger.debug("Sensor:"+source+":"+m.name+":"+str(m.id)+":"+m.type+":Active")
     # check if there is a trigger for this motion event
     try:
         t = Trigger.objects.get(trigger=Trigger.MOTION, motion_detector__source_id=device_id)
         if t.enabled:
-            logger.debug("Trigger "+t.name+"("+str(t.id)+") fired!")
+            logger.debug("Trigger:"+t.name+" "+str(t.id)+" fired")
             eval=True
         else:
-            logger.debug("Trigger "+t.name+ " will not fire because it is disabled")
+            logger.debug("Trigger:"+t.name+" "+str(t.id)+" disabled")
             eval=False
     except:
        eval=False
@@ -50,7 +58,7 @@ def register_sensor_event(source, device_id, state):
         m = Sensor.objects.get(id=device_id)
     elif "Vivint" in source:
         m = Device.objects.get(id=device_id)
-    logger.debug(source+" "+m.name+"("+str(m.id)+") is now "+state)
+    logger.debug("Sensor:"+source+":"+m.name+":"+str(m.id)+":"+m.type+":"+state)
     try:
         if state == "Opened":
             t = Trigger.objects.get(trigger=Trigger.SENSOR_OPENED, sensor__source_id=device_id)
@@ -62,12 +70,11 @@ def register_sensor_event(source, device_id, state):
             t = Trigger.objects.get(trigger=Trigger.LOCK_UNLOCKED, lock__source_id=device_id)
         else:
             logger.error("Sensor has an unknown state of "+state)
-
         if t.enabled:
-            logger.debug("Trigger "+t.name+"("+str(t.id)+") fired!")
+            logger.debug("Trigger:"+t.name+" "+str(t.id)+" fired")
             eval=True
         else:
-            logger.debug("Trigger "+t.name+ " will not fire because it is disabled")
+            logger.debug("Trigger:"+t.name+" "+str(t.id)+" disabled")
             eval=False
     except:
        eval=False
@@ -77,16 +84,16 @@ def register_sensor_event(source, device_id, state):
 
 def register_security_event(who, state):
     # arm state
-    logger.debug(who+" set house to "+state)
+    logger.debug("Security:Vivint:"+who+" set house to "+state)
     who = who.split()
     try:
         t = Trigger.objects.get(trigger=Trigger.SECURITY_ARMED_STATE, people__user__first_name=who[0], armed_state=state)
         logger.error(t)
         if t.enabled:
-            logger.info("Trigger "+t.name+"("+str(t.id)+") fired!")
+            logger.debug("Trigger:"+t.name+" "+str(t.id)+" fired")
             eval=True
         else:
-            logger.debug("Trigger "+t.name+ " will not fire because it is disabled")
+            logger.debug("Trigger:"+t.name+" "+str(t.id)+" disabled")
             eval=False
     except:
        eval=False
@@ -98,35 +105,79 @@ def register_security_event(who, state):
 
 
 def register_hvac_event(who, what, oldValue, newValue):
-    logger.info(who+" "+what+" has changed from "+str(oldValue)+" to "+str(newValue))
+    logger.info("Hvac:"+who+":"+what+" changed from "+str(oldValue)+" to "+str(newValue))
 
 
-def register_window_event(t):
+def register_time_event(t):
     if t.enabled:
-        logger.debug("Trigger "+t.name+"("+str(t.id)+") fired!")
+        logger.debug("Trigger:"+t.name+" "+str(t.id)+" fired")
         evaluate_nuggets(t.id)
     else:
-        logger.debug("Trigger "+t.name+ " will not fire because it is disabled")
+        logger.debug("Trigger:"+t.name+" "+str(t.id)+" disabled")
 
-def check_trigger_windows():
-    triggers = Trigger.objects.filter(trigger="Window")
-    logger.debug("checking time window triggers")
+
+def check_time_triggers():
+    triggers = Trigger.objects.filter(trigger=Trigger.WINDOW)
     for t in triggers:
         if t.window_start <= timezone.localtime().time() <= t.window_end :
-            register_window_event(t)
+            register_time_event(t)
+    triggers = Trigger.objects.filter(trigger=Trigger.SCHEDULE)
+    for t in triggers:
+         if t.external_schedule.source == 1: #hue
+             schedule = Schedule.objects.get(id=t.external_schedule.source_id)
+             time = schedule.localtime
+#             time =  'T13:00:00/T15:00:00'
+             time_segments = time.split("/T",1)
+#             logger.debug(time_segments)
+             if "T" in time_segments[0]:
+                 # T indicates the next part is a time
+                 # T[hh]:[mm]:[ss]/T[hh]:[mm]:[ss]
+                 #  Every day from left time to right time (maximal interval length is 23 hours)
+                 start_time = datetime.datetime.strptime(time_segments[0].replace("T",""),'%H:%M:%S').time()
+                 end_time = datetime.datetime.strptime(time_segments[1],'%H:%M:%S').time()
+                 if start_time <= timezone.localtime().time() <= end_time :
+                      register_time_event(t)
+             elif "W" in time_segments[0]:
+                 # Where W indicates weekly recurrence.
+                 # W[bbb]/T[hh]:[mm]:[ss]/T[hh]:[mm]:[ss]
+                 # Every weekday given by bbb from left side time to right side time
+                 # bbb [0..127] – is a bit mask to indicate which days in a 7 day cycle are chosen 
+                 # so bbb = 0MTWTFSS – So only Tuesdays is 00100000 = 32
+                 day = (int(datetime.datetime.today().weekday())+1)
+                 day_mask  =  int(time_segments[0].replace("W",""))
+                 txt = "{0:08b}"
+                 day_list = list(txt.format(day_mask))
+                 if int(day_list[day]) == 1:
+                     start_time = datetime.datetime.strptime(time_segments[1].replace("T",""),'%H:%M:%S')
+                     if len(time_segments) > 2:
+                         end_time = datetime.datetime.strptime(time_segments[2],'%H:%M:%S').time()
+                     else:
+                         end_time = (start_time + datetime.timedelta(minutes=1)).time()
+                     if start_time.time() <= timezone.localtime().time() <= end_time :
+                         register_time_event(t)
+             else:
+                 logger.error("Hue time format in schedule not accounted for. "+str(time))
+         else:
+             logger.warning("There is no external schedule parser setup for type: "+Trigger.SOURCE[t.external_schedule.source])
+
+
+# motion_detector__source_id
+#        if t.window_start <= timezone.localtime().time() <= t.window_end :
+#            register_time_event(t)
+
 
 def evaluate_nuggets(t_id):
     nugs = Nugget.objects.filter(triggers=t_id)
     for nug in nugs:
         if nug.enabled:
-            logger.debug("Evaluating "+nug.name)
+            logger.info("Evaluating:"+nug.name)
             # you now have a nugget that has the particular trigger which cause this evaluation
             triggers = nug.triggers.all()
             results = []
             for t in triggers:
             # evaulate if each trigger is true?
                 if t.id == t_id:
-                    logger.debug(t.name+" state True")
+                    logger.debug("Trigger:"+t.name+" "+str(t.id)+" True")
                     results.append(True)
                 elif t.trigger == t.MOTION:
                     # vivint motion
@@ -139,14 +190,14 @@ def evaluate_nuggets(t_id):
                         else:
                             state=False
                         results.append(state)
-                        logger.debug("Vivint Motion Sensor "+t.motion_detector.name+" state "+str(state))
+                        logger.debug("Evaluating:"+nug.name+":Vivint:"+t.motion_detector.name+" state "+str(state))
                     # hue motion
                     elif t.motion_detector.source == 1:
                         state = Sensor.objects.get(id=t.motion_detector.source_id).presence
-                        logger.debug("Hue Motion Sensor "+t.motion_detector.name+" state "+str(state))
+                        logger.debug("Evaluating:"+nug.name+":Hue:"+t.motion_detector.name+" state "+str(state))
                         results.append(state)
                     else:
-                        logger.warning("There is no motion state lookup for source "+str(t.motion_detector_id__source)) 
+                        logger.warning("There is no motion state lookup for source "+str(t.motion_detector_id__source))
                         results.append(False)
                 elif t.trigger == t.WINDOW:
                     if t.window_start <= timezone.localtime().time() <= t.window_end :
@@ -213,12 +264,12 @@ def execute_actions(n_id):
         if action.enabled:
             # honor action grace period
             if action.action_grace_period <= 0 or (timezone.localtime() - action.last_action_time > timedelta(minutes=int(action.action_grace_period))):
-                logger.info("action "+action.name+" in "+nug.name+" will execute!")
+                logger.info("Action:"+action.name+":"+nug.name+":"+str(action.enabled))
                 run_actions(action)
             else:
                 logger.debug("Not running action as it has run within the grace period of "+str(action.action_grace_period))
         else:
-            logger.warning(action.name+" is disabled and will not execute")
+            logger.warning("Action:"+action.name+":"+nug.name+":"+str(action.enabled))
 
 
 def run_actions(action):
