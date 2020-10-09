@@ -49,7 +49,7 @@ HomeAuto currently supports devices from the following:
 * Lights (triggers and actions)
 * Sensors (triggers)
 * Groups (actions)
-* Schedules
+* Schedules (triggers)
 * Scenes (actions)
 ### Leviton Decora Wifi
 * api account (syncing devices)
