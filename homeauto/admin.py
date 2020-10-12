@@ -1,11 +1,10 @@
-
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from django.contrib.admin import AdminSite
-
 from django import forms
 
+import homeauto.models.watcher as watcher
 import homeauto.models.wemo as wemo
 import homeauto.models.hue as hue
 import homeauto.models.decora as decora
@@ -20,167 +19,193 @@ admin.site.index_title = 'House Administration'
 admin.site.index_template = 'admin/ha_index.html'
 
 class ZoneAdmin(admin.ModelAdmin):
-    list_display = ('name','id', 'enabled')
-    pass
+    list_display = ('name', 'id', 'enabled')
+
+
 admin.site.register(house.Zone, ZoneAdmin)
 
 class JobAdmin(admin.ModelAdmin):
-    list_display = ('command','id', 'interval', 'enabled')
-    pass
+    list_display = ('command', 'id', 'interval', 'enabled')
+
+
 admin.site.register(house.Job, JobAdmin)
 
 class AccountAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id','username', 'enabled')
-    pass
+    list_display = ('name', 'id', 'username', 'enabled')
+
+
 admin.site.register(house.Account, AccountAdmin)
 
 class NuggetAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id', 'enabled')
-    pass
+    list_display = ('name', 'id', 'enabled', 'only_execute_if_someone_is_home')
+
+
 admin.site.register(house.Nugget, NuggetAdmin)
 
 class HouseMotionDetectorAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id','enabled', 'source', 'source_id')
-    pass
+    list_display = ('name', 'id', 'enabled', 'source', 'source_id')
+
+
 admin.site.register(house.HouseMotionDetector, HouseMotionDetectorAdmin)
 
 class HouseLightAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id','enabled', 'source', 'source_type','source_id')
+    list_display = ('name', 'id', 'enabled', 'source', 'source_type', 'source_id')
     list_filter = ('source', 'source_type')
-    pass
+
+
 admin.site.register(house.HouseLight, HouseLightAdmin)
 
 class HouseLockAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id','enabled', 'source', 'source_type','source_id')
+    list_display = ('name', 'id', 'enabled', 'source', 'source_type', 'source_id')
     list_filter = ('source', 'source_type')
-    pass
+
+
 admin.site.register(house.HouseLock, HouseLockAdmin)
 
 class HouseSensorAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id','enabled', 'source', 'source_type','source_id')
+    list_display = ('name', 'id', 'enabled', 'source', 'source_type', 'source_id')
     list_filter = ('source', 'source_type')
-    pass
+
+
 admin.site.register(house.HouseSensor, HouseSensorAdmin)
 
 class HouseScheduleAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id','enabled', 'source', 'source_type','source_id')
+    list_display = ('name', 'id', 'enabled', 'source', 'source_type', 'source_id')
     list_filter = ('source', 'source_type')
-    pass
+
+
 admin.site.register(house.HouseSchedule, HouseScheduleAdmin)
-
-
-
 
 class TriggerForm(forms.Form):
     name = forms.CharField(required=False)
+
 
 def view(request):
     form = TriggerForm(initial={'name': 'Peter'})
     return render(request, 'trigger_edit.html', form=form)
 
+
 class TriggerAdmin(admin.ModelAdmin):
     list_display = ('name', 'enabled', 'trigger', 'id')
     change_form_template = 'trigger_edit.html'
-    pass
+
+
 admin.site.register(house.Trigger, TriggerAdmin)
 
 class ActionAdmin(admin.ModelAdmin):
     list_display = ('name', 'enabled', 'action', 'last_action_time')
-    pass
+
+
 admin.site.register(house.Action, ActionAdmin)
 
-
 class InfinityAdmin(admin.ModelAdmin):
-    list_display = ('name', 'enabled', 'ip', 'port','mode')
-    pass
+    list_display = ('name', 'enabled', 'ip', 'port', 'mode')
+
+
 admin.site.register(infinity.Infinity, InfinityAdmin)
 
 class InfStatusAdmin(admin.ModelAdmin):
-    list_display = ("infinity", "current_activity", "heat_mode", "filtrlvl", "hold", "fan", "vaca_running")
-    pass
+    list_display = ('infinity', 'current_activity', 'heat_mode', 'filtrlvl', 'hold',
+                    'fan', 'vaca_running')
+
+
 admin.site.register(infinity.InfStatus, InfStatusAdmin)
 
 class InfProfileAdmin(admin.ModelAdmin):
     list_display = ('infinity', 'name', 'fan', 'clsp', 'htsp')
     list_filter = ('infinity', 'name')
-    pass
+
+
 admin.site.register(infinity.InfProfile, InfProfileAdmin)
 
 class InfActivityAdmin(admin.ModelAdmin):
     list_display = ('infinity', 'activity', 'enabled', 'time', 'day', 'period')
     list_filter = ('infinity', 'activity', 'day', 'period', 'enabled')
-    pass
+
+
 admin.site.register(infinity.InfActivity, InfActivityAdmin)
 
-
-
-
 class WemoAdmin(admin.ModelAdmin):
-    list_display = ('name','id', 'type', 'status', 'enabled')
-    pass
+    list_display = ('name', 'id', 'type', 'status', 'enabled')
+
+
 admin.site.register(wemo.Wemo, WemoAdmin)
 
+class WatcherAdmin(admin.ModelAdmin):
+    list_display = ('name', 'id', 'enabled', 'directory')
+
+
+admin.site.register(watcher.Directory, WatcherAdmin)
+
 class DecoraSwitchAdmin(admin.ModelAdmin):
-    list_display = ('name','id', 'model', 'power', 'enabled')
-    pass
+    list_display = ('name', 'id', 'model', 'power', 'enabled')
+
+
 admin.site.register(decora.Switch, DecoraSwitchAdmin)
 
 class HueGroupAdmin(admin.ModelAdmin):
-    list_display = ('name','id', 'type', 'on', 'enabled')
-    pass
+    list_display = ('name', 'id', 'type', 'on', 'enabled')
+
+
 admin.site.register(hue.Group, HueGroupAdmin)
 
 class HueLightAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id','type', 'modelid', 'on', 'enabled')
+    list_display = ('name', 'id', 'type', 'modelid', 'on', 'enabled')
     list_filter = ('type', 'modelid', 'on', 'enabled')
-    pass
+
+
 admin.site.register(hue.Light, HueLightAdmin)
 
 class HueSceneAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'group', 'enabled')
-    pass
+
+
 admin.site.register(hue.Scene, HueSceneAdmin)
 
 class HueBridgeAdmin(admin.ModelAdmin):
-    list_display = ('ip', 'id','alarm_use', 'count_down_lights', 'enabled')
-    pass
-admin.site.register(hue.Bridge, HueBridgeAdmin)
+    list_display = ('ip', 'id', 'alarm_use', 'count_down_lights', 'enabled')
 
+
+admin.site.register(hue.Bridge, HueBridgeAdmin)
 admin.site.register(hue.SceneLightstate)
+admin.site.register(house.CustomEvent)
 
 class HueSensorAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id','presence', 'productname', 'lastupdated', 'battery', 'enabled')
-    pass
+    list_display = ('name', 'id', 'presence', 'productname', 'lastupdated', 'battery',
+                    'enabled')
+
+
 admin.site.register(hue.Sensor, HueSensorAdmin)
 
 class HueScheduleAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id','localtime', 'enabled')
-    pass
+    list_display = ('name', 'id', 'localtime', 'enabled')
+
+
 admin.site.register(hue.Schedule, HueScheduleAdmin)
 
 class VivintPanelAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id','armed_state', 'street', 'city')
-    pass
+    list_display = ('name', 'id', 'armed_state', 'street', 'city')
+
+
 admin.site.register(vivint.Panel, VivintPanelAdmin)
 
 class VivintDeviceAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'state', 'type', 'enabled')
     list_filter = ('state', 'type', 'enabled')
-    pass
+
+
 admin.site.register(vivint.Device, VivintDeviceAdmin)
 
-
-# Define an inline admin descriptor for Person model
-# which acts a bit like a singleton
 class PersonInline(admin.StackedInline):
     model = house.Person
     can_delete = False
     verbose_name_plural = 'Home Auto Options'
 
-# Define a new User admin
-class UserAdmin(BaseUserAdmin):
-    inlines = (PersonInline,)
 
-# Re-register UserAdmin
+class UserAdmin(BaseUserAdmin):
+    inlines = (
+     PersonInline,)
+
+
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)

@@ -109,7 +109,13 @@ class Job(models.Model):
 
 
 
-
+class CustomEvent(models.Model):
+    name = models.CharField(max_length=60, primary_key=True)
+    def __str__(self):
+        return '{}'.format(self.name)
+    def save(self, *args, **kwargs):
+        self.name = self.name.lower()
+        super(CustomEvent, self).save(*args, **kwargs)
 
 class Person(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -169,6 +175,8 @@ class Trigger(Common):
     HVAC_FILTRLVL = 'Filter Level'
     HVAC_HUMLVL = 'Humidity Level'
     SECURITY_ARMED_STATE = 'Armed State'
+    PEOPLE = "People Do Something"
+    CUSTOM_EVENT = "Events"
 
     TRIGGER_TYPES =[
         ('Time' ,(
@@ -194,6 +202,13 @@ class Trigger(Common):
         ('Security' ,(
                 (SECURITY_ARMED_STATE,SECURITY_ARMED_STATE),
         )),
+        ('People' ,(
+                (PEOPLE,PEOPLE),
+        )),
+        ('Watcher Events' ,(
+                (CUSTOM_EVENT,CUSTOM_EVENT),
+        )),
+
 
     ]
     trigger = models.CharField(max_length=60,choices=TRIGGER_TYPES, default=MOTION)
@@ -204,21 +219,26 @@ class Trigger(Common):
     window_end = models.TimeField(default=timezone.now)
     external_schedule =  models.OneToOneField(HouseSchedule, on_delete=models.CASCADE, blank=True, null=True)
     people =  models.ManyToManyField(Person, blank=True)
+    people_has_left = models.BooleanField(default=False)
+    people_has_arrived = models.BooleanField(default=False)
     armed_state =  models.CharField(max_length=60,choices=Common.ARM_STATES, default=Common.DISARMED)
     hvac_unit = models.ManyToManyField(Infinity, blank=True)
     hvac_profile = models.CharField(max_length=60,choices=Common.HVAC_PROFILES, default=Common.HOME)
     hvac_value = models.IntegerField(default=0)
     hvac_hold = models.BooleanField(default=False)
     hvac_heat_mode = models.CharField(max_length=60,choices=Common.HVAC_HEAT_MODES, default=Common.OFF)
+    event = models.OneToOneField(CustomEvent, on_delete=models.CASCADE, blank=True, null=True)
 
 class Action(Common):
+    PLAY_SCENE = 'Play Scenes'
     TURN_ON = 'Turn On Lights'
     TURN_OFF = 'Turn Off Lights'
-    PLAY_SCENE = 'Play a Scene'
-    BLINK_HUE = 'Blink a Hue Group'
+    BLINK_HUE = 'Blink Hue Groups'
     SEND_TEXT = 'Send a Text Message'
     HVAC_SET_ACTIVITY = 'Set HVAC Current Activity'
     SECURITY_SET_STATE = 'Set Armed State'
+    PEOPLE_LEAVE = "Mark People Away"
+    PEOPLE_ARRIVE = "Mark People Home"
     ACTION_TYPES =[
         ('Alter Lights',(
 	        (TURN_ON,TURN_ON),
@@ -235,13 +255,27 @@ class Action(Common):
         ('Security' ,(
                 (SECURITY_SET_STATE,SECURITY_SET_STATE),
         )),
+        ('People Status' ,(
+                (PEOPLE_LEAVE,PEOPLE_LEAVE),
+                (PEOPLE_ARRIVE,PEOPLE_ARRIVE),
+        )),
+    ]
+
+    REMOVE_HOLD = "Remove Hold"
+    SET_TEMPORAY_AWAY = "Set temporary AWAY"
+    HVAC_ACTIONS =[
+        (REMOVE_HOLD,REMOVE_HOLD),
+        (SET_TEMPORAY_AWAY,SET_TEMPORAY_AWAY),
     ]
 
     action = models.CharField(max_length=60,choices=ACTION_TYPES, default=TURN_ON)
     lights = models.ManyToManyField(HouseLight, blank=True)
-    scene = models.OneToOneField(Scene,on_delete=models.CASCADE, blank=True, null=True)
+    scenes = models.ManyToManyField(Scene,blank=True)
     people = models.ManyToManyField(Person,blank=True)
     text_message = models.CharField(max_length=120, default="", blank=True, null=True)
+    hvac_unit = models.ManyToManyField(Infinity, blank=True)
+    hvac_actions = models.CharField(max_length=60,choices=HVAC_ACTIONS, default=REMOVE_HOLD)
+    people =  models.ManyToManyField(Person, blank=True)
     action_grace_period = models.IntegerField(default=-1)
     last_action_time = models.DateTimeField(default=timezone.now,blank=True, null=True)
 
@@ -249,6 +283,7 @@ class Action(Common):
 class Nugget(Common):
     triggers =  models.ManyToManyField(Trigger, blank=False)
     actions = models.ManyToManyField(Action, blank=False)
+    only_execute_if_someone_is_home = models.BooleanField(default=False)
 
 
 

@@ -10,8 +10,11 @@ from .house import HouseSchedule
 from .house import Action
 from .house import Nugget
 from .house import Trigger
+from .house import CustomEvent
 
 from .wemo import Wemo
+
+from .watcher import Directory
 
 from .decora import Switch
 

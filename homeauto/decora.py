@@ -1,70 +1,66 @@
 from django.conf import settings
 from homeauto.models.decora import Switch
 from homeauto.models.house import Account
-import json
-import subprocess
-import logging
-
+import json, subprocess, logging
 from homeauto.api_decora.decora_wifi import DecoraWiFiSession
 from homeauto.api_decora.decora_wifi.models.person import Person
 from homeauto.api_decora.decora_wifi.models.residential_account import ResidentialAccount
 from homeauto.api_decora.decora_wifi.models.residence import Residence
 
-# This retrieves a Python logging instance (or creates it)
 logger = logging.getLogger(__name__)
 
 ACCT_NAME = 'Decora'
 
-
 def turn_on_light(switch):
-    decora(switch.name,'ON','None')
+    decora(switch.name, 'ON', 'None')
+
 
 def turn_off_light(switch):
-    decora(switch.name,'ON','None')
+    decora(switch.name, 'ON', 'None')
 
 
 def decora(switch_name, command, brightness):
-    logger.debug('switch:'+switch_name+' command:'+str(command)+' brightness: '+brightness)
-    username = Home.private.get('Decora','username')
-    password = Home.private.get('Decora','password')
-
+    logger.debug('switch:' + switch_name + ' command:' + str(command) + ' brightness: ' + brightness)
+    username = Home.private.get('Decora', 'username')
+    password = Home.private.get('Decora', 'password')
     session = DecoraWiFiSession()
     session.login(username, password)
-
     perms = session.user.get_residential_permissions()
     all_residences = []
     for permission in perms:
-      if permission.residentialAccountId is not None:
-        acct = ResidentialAccount(session, permission.residentialAccountId)
-        for res in acct.get_residences():
-          all_residences.append(res)
-      elif permission.residenceId is not None:
-        res = Residence(session, permission.residenceId)
-        all_residences.append(res)
-    for residence in all_residences:
-      for switch in residence.get_iot_switches():
-        attribs = {}
-        if switch.name == switch_name:
-          if brightness is not "None":
-            attribs['brightness'] = brightness
-          if command == 'ON':
-            attribs['power'] = 'ON'
-          else:
-            attribs['power'] = 'OFF'
-          logger.debug(switch.name+':'+str(attribs))
-        switch.update_attributes(attribs)
+        if permission.residentialAccountId is not None:
+            acct = ResidentialAccount(session, permission.residentialAccountId)
+            for res in acct.get_residences():
+                all_residences.append(res)
 
+        else:
+            if permission.residenceId is not None:
+                res = Residence(session, permission.residenceId)
+                all_residences.append(res)
+
+    for residence in all_residences:
+        for switch in residence.get_iot_switches():
+            attribs = {}
+            if switch.name == switch_name:
+                if brightness is not 'None':
+                    attribs['brightness'] = brightness
+                else:
+                    if command == 'ON':
+                        attribs['power'] = 'ON'
+                    else:
+                        attribs['power'] = 'OFF'
+                    logger.debug(switch.name + ':' + str(attribs))
+            else:
+                switch.update_attributes(attribs)
     Person.logout(session)
 
 
-
 def sync_decora():
-    # get decora account 
     if Account.objects.filter(name=ACCT_NAME).exists():
-        logger.debug("Account name "+ACCT_NAME+" exists")
+        logger.debug('Account name ' + ACCT_NAME + ' exists')
         decoraAcct = Account.objects.get(name=ACCT_NAME)
         if getattr(decoraAcct, 'enabled'):
-            logger.debug("Account "+ACCT_NAME+" is enabled")
+            logger.debug('Account ' + ACCT_NAME + ' is enabled')
             session = DecoraWiFiSession()
             try:
                 session.login(getattr(decoraAcct, 'username'), getattr(decoraAcct, 'password'))
@@ -72,18 +68,20 @@ def sync_decora():
                 logger.debug('{} premissions'.format(len(perms)))
                 all_residences = []
                 for permission in perms:
-                    logger.debug("Permission: {}".format(permission))
+                    logger.debug('Permission: {}'.format(permission))
                     if permission.residentialAccountId is not None:
                         acct = ResidentialAccount(session, permission.residentialAccountId)
                         for res in acct.get_residences():
                             all_residences.append(res)
-                    elif permission.residenceId is not None:
-                        res = Residence(session, permission.residenceId)
-                        all_residences.append(res)
+
+                    else:
+                        if permission.residenceId is not None:
+                            res = Residence(session, permission.residenceId)
+                            all_residences.append(res)
+
                 for residence in all_residences:
                     for switch in residence.get_iot_switches():
                         data = {}
-#                        print(switch)
                         data['name'] = switch.name
                         data['mic_mute'] = switch.mic_mute
                         data['lang'] = switch.lang
@@ -108,7 +106,7 @@ def sync_decora():
                         data['presetLevel'] = switch.presetLevel
                         data['timeZone'] = switch.timeZone
                         data['buttonData'] = switch.buttonData
-                        data['id'] = switch.id 
+                        data['id'] = switch.id
                         data['apply_ota'] = switch.apply_ota
                         data['cloud_ota'] = switch.cloud_ota
                         data['canSetLevel'] = switch.canSetLevel
@@ -144,26 +142,26 @@ def sync_decora():
                         data['dstStart'] = switch.dstStart
                         data['onTime'] = switch.onTime
                         data['connectedTimestamp'] = switch.connectedTimestamp
-
                         if switch.power == 'OFF':
                             data['power'] = False
                         elif switch.power == 'ON':
                             data['power'] = True
-
-                        if not Switch.objects.filter(id=data['id']).exists():
-                            logger.info("Creating Decora Switch:"+data['name'])
-                            s = Switch.objects.create(**data)
+                        if not Switch.objects.filter(id=(data['id'])).exists():
+                            logger.info('Creating Decora Switch:' + data['name'])
+                            s = (Switch.objects.create)(**data)
                             s.save()
-                        # otherwise update the schedule
                         else:
-                            logger.debug("Updating Decora Switch:"+data['name'])
-                            Switch.objects.filter(id=data['id']).update(**data)
+                            logger.debug('Updating Decora Switch:' + data['name'])
+                            (Switch.objects.filter(id=(data['id'])).update)(**data)
+
             except ValueError as error:
-                logger.error(error)
-
-
+                try:
+                    logger.error(error)
+                finally:
+                    error = None
+                    del error
 
         else:
-            logger.warning("Cannot sync Decora data because the account is disabled")
+            logger.warning('Cannot sync Decora data because the account is disabled')
     else:
-        logger.error("Cannot sync Decora data because no Account information for "+ACCT_NAME+"  exist")
+        logger.error('Cannot sync Decora data because no Account information for ' + ACCT_NAME + '  exist')
