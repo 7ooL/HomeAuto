@@ -65,6 +65,7 @@ class Common(models.Model):
         return '{}'.format(self.name)
     class Meta:
         abstract = True
+        ordering = ('name',)
 
 class Job(models.Model):
     COMMAND_TYPES = (

@@ -19,7 +19,7 @@ def turn_on_light(device):
 
 def turn_off_light(device):
     if device.enabled:
-        if not device.status:
+        if device.status:
             cmd = '/usr/local/bin/wemo switch "' + device.name + '" off'
             proc = subprocess.Popen([cmd], stdout=(subprocess.PIPE), shell=True)
             out, err = proc.communicate()

@@ -87,6 +87,7 @@ def view(request):
 
 class TriggerAdmin(admin.ModelAdmin):
     list_display = ('name', 'enabled', 'trigger', 'id')
+    list_filter = ('enabled', 'trigger')
     change_form_template = 'trigger_edit.html'
 
 
@@ -94,6 +95,7 @@ admin.site.register(house.Trigger, TriggerAdmin)
 
 class ActionAdmin(admin.ModelAdmin):
     list_display = ('name', 'enabled', 'action', 'last_action_time')
+    list_filter = ('enabled', 'action')
 
 
 admin.site.register(house.Action, ActionAdmin)

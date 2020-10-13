@@ -91,7 +91,7 @@ LOGGING = {
         },
         'homeauto.decora': {
             'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
         'homeauto.watcher': {
             'handlers': ['file', 'console'],

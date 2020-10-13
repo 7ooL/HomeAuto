@@ -69,8 +69,7 @@ def sync_vivint_sensors():
                     else:
                         logger.debug('Updating Device: ' + ddata['name'])
                         (Device.objects.filter(id=ID).update)(**ddata)
-
         else:
-            logger.warning('Cannot connect to Vivint because the account is disabled')
+            logger.warning('Cannot connect to ' + ACCT_NAME + ' because the account is disabled')
     else:
-        logger.error('Cannot coonect to Vivint because no Account information for ' + ACCT_NAME + ' exist')
+        logger.error('No account ' + ACCT_NAME + ' exist')

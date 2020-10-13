@@ -1,10 +1,10 @@
-from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
+import apscheduler.job, re, os, logging
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ProcessPoolExecutor, ThreadPoolExecutor
-from django_apscheduler.jobstores import register_events, register_job, DjangoJobStore
-import apscheduler.job, re
 from datetime import datetime
+from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
+from django_apscheduler.jobstores import register_events, register_job, DjangoJobStore
 from homeauto.models.house import Job, HouseMotionDetector, HouseLight, HouseLock, HouseSensor, Trigger, HouseSchedule
 from homeauto.models.hue import Sensor, Light, Group, Scene, Schedule
 from homeauto.models.wemo import Wemo
@@ -16,7 +16,6 @@ import homeauto.wemo as WemoJobs
 import homeauto.decora as DecoraJobs
 import homeauto.house as HouseJobs
 import homeauto.infinity as InfinityJobs
-import logging
 
 logger = logging.getLogger(__name__)
 scheduler = BackgroundScheduler(settings.SCHEDULER_CONFIG)
@@ -135,9 +134,9 @@ def dropbox_job():
         cmdline = ''
 
     if cmdline:
-        logger.debug('Service: ' + name + ' is running')
+        logger.debug('Dropbox is running')
     else:
-        logger.warning('Service: ' + name + " isn't running")
+        logger.warning("Dropbox service isn't running")
         os.system(command)
 
 

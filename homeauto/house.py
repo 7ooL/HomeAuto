@@ -94,7 +94,6 @@ def register_watcher_event(event):
                     return
                 else:
                     try:
-                        logger.warning(e.name)
                         t = Trigger.objects.get(trigger=(Trigger.CUSTOM_EVENT), event__name=(e.name))
                         if t.enabled:
                             logger.debug('Trigger:' + t.name + ' ' + str(t.id) + ' fired')
@@ -286,7 +285,7 @@ def evaluate_nuggets(t_id):
     nugs = Nugget.objects.filter(triggers=t_id)
     for nug in nugs:
         if is_nugget_runable(nug):
-            logger.info('Evaluating:' + nug.name)
+            logger.debug('Evaluating:' + nug.name)
             triggers = nug.triggers.all()
             results = []
             for t in triggers:
@@ -312,62 +311,81 @@ def evaluate_nuggets(t_id):
                         else:
                             logger.warning('There is no motion state lookup for source ' + str(t.motion_detector_id__source))
                             results.append(False)
-                    else:
-                        if t.trigger == t.WINDOW:
-                            if t.window_start <= timezone.localtime().time() <= t.window_end:
-                                logger.debug(t.name + ' timeframe state True')
-                                results.append(True)
-                            else:
-                                logger.debug(t.name + ' timeframe state False')
-                                results.append(False)
+                    elif t.trigger == t.WINDOW:
+                        if t.window_start <= timezone.localtime().time() <= t.window_end:
+                            logger.debug(t.name + ' timeframe state True')
+                            results.append(True)
                         else:
-                            if t.trigger == t.SCHEDULE:
-                                logger.debug('evaluating a SCHEDULE trigger')
-                            else:
-                                if t.trigger == t.SENSOR_OPENED:
-                                    logger.debug('evaluating a SENSOR_OPENED trigger')
-                                else:
-                                    if t.trigger == t.SENSOR_CLOSED:
-                                        logger.debug('evaluating a SENSOR_CLOSED trigger')
+                            logger.debug(t.name + ' timeframe state False')
+                            results.append(False)
+                    elif t.trigger == t.SCHEDULE:
+                        logger.debug('evaluating a SCHEDULE trigger')
+                        results.append(False)
+                    elif t.trigger == t.SENSOR_OPENED:
+                        logger.debug('evaluating a SENSOR_OPENED trigger')
+                        results.append(False)
+                    elif t.trigger == t.SENSOR_CLOSED:
+                        logger.debug('evaluating a SENSOR_CLOSED trigger')
+                        results.append(False)
+                    elif t.trigger == t.LOCK_UNLOCKED:
+                        logger.debug('evaluating a LOCK_UNLOCKED trigger')
+                        results.append(False)
+                    elif t.trigger == t.LOCK_LOCKED:
+                        logger.debug('evaluating a LOCK_LOCKED trigger')
+                        results.append(False)
+                    elif t.trigger == t.HVAC_ACTIVITY:
+                        logger.debug('evaluating a HVAC_ACTIVITY trigger')
+                        results.append(False)
+                    elif t.trigger == t.HVAC_FAN:
+                        logger.debug('evaluating a HVAC_FAN trigger')
+                        results.append(False)
+                    elif t.trigger == t.HVAC_HITS_TEMP:
+                        logger.debug('evaluating a HVAC_HITS_TEMP trigger')
+                        results.append(False)
+                    elif t.trigger == t.HVAC_HOLD:
+                        logger.debug('evaluating a HVAC_HOLD trigger')
+                        results.append(False)
+                    elif t.trigger == t.HVAC_HEATMODE:
+                        logger.debug('evaluating a HVAC_HEATMODE trigger')
+                        results.append(False)
+                    elif t.trigger == t.HVAC_FILTRLVL:
+                        logger.debug('evaluating a HVAC_FILTRLVL trigger')
+                        results.append(False)
+                    elif t.trigger == t.HVAC_HUMLVL:
+                        logger.debug('evaluating a HVAC_HUMLVL trigger')
+                        results.append(False)
+                    elif t.trigger == t.SECURITY_ARMED_STATE:
+                        logger.debug('evaluating a SECURITY_ARMED_STATE trigger')
+                        try:
+                            Panel.objects.get(armed_state=(t.armed_state))
+                            results.append(True)
+                        except:
+                            results.append(False)
+                    elif t.trigger == t.PEOPLE:
+                        if t.people_has_left:
+                            try:
+                                for person in t.people.all():
+                                    if not person.is_home:
+                                        logger.debug(person.user.username + ' found not to be home')
+                                        results.append(False)
                                     else:
-                                        if t.trigger == t.LOCK_UNLOCKED:
-                                            logger.debug('evaluating a LOCK_UNLOCKED trigger')
-                                        else:
-                                            if t.trigger == t.LOCK_LOCKED:
-                                                logger.debug('evaluating a LOCK_LOCKED trigger')
-                                            else:
-                                                if t.trigger == t.HVAC_ACTIVITY:
-                                                    logger.debug('evaluating a HVAC_ACTIVITY trigger')
-                                                else:
-                                                    if t.trigger == t.HVAC_FAN:
-                                                        logger.debug('evaluating a HVAC_FAN trigger')
-                                                    else:
-                                                        if t.trigger == t.HVAC_HITS_TEMP:
-                                                            logger.debug('evaluating a HVAC_HITS_TEMP trigger')
-                                                        else:
-                                                            if t.trigger == t.HVAC_HOLD:
-                                                                logger.debug('evaluating a HVAC_HOLD trigger')
-                                                            else:
-                                                                if t.trigger == t.HVAC_HEATMODE:
-                                                                    logger.debug('evaluating a HVAC_HEATMODE trigger')
-                                                                else:
-                                                                    if t.trigger == t.HVAC_FILTRLVL:
-                                                                        logger.debug('evaluating a HVAC_FILTRLVL trigger')
-                                                                    else:
-                                                                        if t.trigger == t.HVAC_HUMLVL:
-                                                                            logger.debug('evaluating a HVAC_HUMLVL trigger')
-                                                                        else:
-                                                                            if t.trigger == t.SECURITY_ARMED_STATE:
-                                                                                logger.debug('evaluating a SECURITY_ARMED_STATE trigger')
-                                                                                try:
-                                                                                    Panel.objects.get(armed_state=(t.armed_state))
-                                                                                    results.append(True)
-                                                                                except:
-                                                                                    results.append(False)
-
-                                                                            else:
-                                                                                logger.error('No nugget evaluation has been defined for: ' + t.TRIGGER_TYPES)
-
+                                        logger.debug(person.user.username + ' found to be home')
+                                        results.append(True)
+                            except:
+                                results.append(False)
+                        elif people_has_arrived:
+                            try:
+                                for person in t.people.all():
+                                    if person.is_home:
+                                        logger.debug(person.user.username + ' found to be home')
+                                        results.append(True)
+                                    else:
+                                        logger.debug(person.user.username + ' found not to be home')
+                                        results.append(True)
+                            except:
+                                results.append(False)
+                    else:
+                        logger.error('No nugget evaluation has been defined for: ' + t.trigger)
             logger.debug(nug)
             logger.debug(results)
             if all(results):
@@ -397,7 +415,6 @@ def run_actions(action):
         if scenes:
             for scene in scenes:
                 HueAction.play_scene(Scene.objects.get(id=(scene.id)))
-
         else:
             logger.error('Query set is empty for:' + action.name)
     elif action.action == action.TURN_ON:
@@ -411,20 +428,18 @@ def run_actions(action):
                         HueAction.turn_on_group(Group.objects.get(id=(light.source_id)))
                     else:
                         logger.warning('No source_type for ' + str(light.source.type))
-                else:
-                    if light.source == 2:
-                        if light.source_type == 4:
-                            WemoAction.turn_on_light(Wemo.objects.get(id=(light.source_id)))
-                        else:
-                            logger.warning('No source_type for ' + str(light.source.type))
+                elif light.source == 2:
+                    if light.source_type == 4:
+                        WemoAction.turn_on_light(Wemo.objects.get(id=(light.source_id)))
                     else:
-                        if light.source == 3:
-                            if light.source_type == 2:
-                                DecoraAction.turn_on_light(Switch.objects.get(id=(light.source_id)))
-                            else:
-                                logger.warning('No source_type for ' + str(light.source.type))
-                        else:
-                            logger.warning('No source for ' + str(lights.source) + ' type ' + str(light.source.type))
+                        logger.warning('No source_type for ' + str(light.source.type))
+                elif light.source == 3:
+                    if light.source_type == 3:
+                        DecoraAction.turn_on_light(Switch.objects.get(id=(light.source_id)))
+                    else:
+                        logger.warning('No source_type for ' + str(light.source.type))
+                else:
+                    logger.warning('No source for ' + str(lights.source) + ' type ' + str(light.source.type))
 
         else:
             logger.error('Query set is empty for:' + action.name)
@@ -432,28 +447,25 @@ def run_actions(action):
         lights = action.lights.all()
         if lights:
             for light in lights:
-                if light.source == 1:
-                    if light.source_type == 0:
+                if light.source == 1: # 1 hue
+                    if light.source_type == 0: # 0 Bulb
                         HueAction.turn_off_light(Light.objects.get(id=(light.source_id)))
-                    elif light.source_type == 1:
+                    elif light.source_type == 1: # Group
                         HueAction.turn_off_group(Group.objects.get(id=(light.source_id)))
                     else:
                         logger.warning('No source_type for ' + str(light.source.type))
-                else:
-                    if light.source == 2:
-                        if light.source_type == 4:
-                            WemoAction.turn_off_light(Wemo.objects.get(id=(light.source_id)))
-                        else:
-                            logger.warning('No source_type for ' + str(light.source.type))
+                elif light.source == 2: # 2 wemo
+                    if light.source_type == 4: # Plug
+                        WemoAction.turn_off_light(Wemo.objects.get(id=(light.source_id)))
                     else:
-                        if light.source == 3:
-                            if light.source_type == 2:
-                                DecoraAction.turn_off_light(Switch.objects.get(id=(light.source_id)))
-                            else:
-                                logger.warning('No source_type for ' + str(light.source))
-                        else:
-                            logger.warning('No source for ' + str(lights.source) + ' type ' + str(light.source.type))
-
+                        logger.warning('No source_type for ' + str(light.source.type))
+                elif light.source == 3: # 3 decora
+                    if light.source_type == 3: # swicth 3
+                        DecoraAction.turn_off_light(Switch.objects.get(id=(light.source_id)))
+                    else:
+                        logger.warning('No source_type for ' + str(light.source))
+                else:
+                    logger.warning('No source for ' + str(lights.source) + ' type ' + str(light.source.type))
         else:
             logger.error('Query set is empty for:' + action.name)
     elif action.action == action.BLINK_HUE:
@@ -488,7 +500,6 @@ def run_actions(action):
             for p in people:
                 p.is_home = False
                 p.save()
-
         else:
             logger.error('Query set is empty for:' + action.name)
     elif action.action == action.PEOPLE_ARRIVE:
@@ -497,7 +508,6 @@ def run_actions(action):
             for p in people:
                 p.is_home = True
                 p.save()
-
         else:
             logger.error('Query set is empty for:' + action.name)
     else:
