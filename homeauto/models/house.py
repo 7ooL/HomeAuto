@@ -232,6 +232,7 @@ class Trigger(Common):
 
 class Action(Common):
     PLAY_SCENE = 'Play Scenes'
+    PLAY_RANDOM_SCENE = 'Play Random Scene'
     TURN_ON = 'Turn On Lights'
     TURN_OFF = 'Turn Off Lights'
     BLINK_HUE = 'Blink Hue Groups'
@@ -245,6 +246,7 @@ class Action(Common):
 	        (TURN_ON,TURN_ON),
 	        (TURN_OFF,TURN_OFF),
 	        (PLAY_SCENE,PLAY_SCENE),
+	        (PLAY_RANDOM_SCENE,PLAY_RANDOM_SCENE),
 	        (BLINK_HUE,BLINK_HUE),
         )),
         ('Notifications',(

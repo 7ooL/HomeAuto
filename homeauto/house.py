@@ -1,4 +1,4 @@
-import logging, requests, json, smtplib, datetime, os
+import logging, requests, json, smtplib, datetime, os, random
 from django.utils import timezone
 from homeauto.models.hue import Sensor, Scene, Light, Group, Schedule
 from homeauto.models.wemo import Wemo
@@ -417,6 +417,14 @@ def run_actions(action):
                 HueAction.play_scene(Scene.objects.get(id=(scene.id)))
         else:
             logger.error('Query set is empty for:' + action.name)
+    elif action.action == action.PLAY_RANDOM_SCENE:
+        scenes = action.scenes.all()
+        if scenes:
+            scene = random.choice(scenes)
+            HueAction.play_scene(Scene.objects.get(id=(scene.id)))
+        else:
+            logger.error('Query set is empty for:' + action.name)
+
     elif action.action == action.TURN_ON:
         lights = action.lights.all()
         if lights:
