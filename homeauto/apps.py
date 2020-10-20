@@ -11,15 +11,24 @@ class Config(AppConfig):
 
         def ready(self):
             from homeauto import jobs, watcher, vivint
-            t1 = threading.Thread(target=(jobs.start))
-            t1.daemon = True
-            t1.start()
-            t2 = threading.Thread(target=(watcher.start))
-            t2.daemon = True
-            t2.start()
-            t3 = threading.Thread(target=(vivint.start))
-            t3.daemon = True
-            t3.start()
+            jobs.start()
+            vivint.start()
+            threads = [ threading.Thread(target=(watcher.start))]
+            for t in threads:
+                t.daemon = True
+                logger.info("Starting: "+t.getName())
+                t.start()
+
+#            t1 = threading.Thread(target=(jobs.start))
+#            t1.daemon = True
+#            t1.start()
+#            t2 = threading.Thread(target=(watcher.start))
+#            t2.daemon = True
+#            t2.start()
+#            t3 = threading.Thread(target=(vivint.start))
+#            t3.daemon = True
+#            t3.start()
+
 
 
 class AppAdminConfig(AdminConfig):

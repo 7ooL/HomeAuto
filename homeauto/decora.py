@@ -14,20 +14,24 @@ ACCT_NAME = 'Decora'
 def turn_on_light(switch):
     if switch.enabled:
         if not switch.power:
-            decora(switch.name, 'ON', 'None')
+            if decora(switch.name, 'ON', 'None'):
+                return True
         else:
             logger.debug('switch ' + switch.name + '(' + str(switch.id) + ') is already on')
     else:
         logger.warning('switch ' + switch.name + '(' + str(switch.id) + ') not enabled')
+    return False
 
 def turn_off_light(switch):
     if switch.enabled:
         if switch.power:
-            decora(switch.name, 'OFF', 'None')
+            if decora(switch.name, 'OFF', 'None'):
+                return True
         else:
             logger.debug('switch ' + switch.name + '(' + str(switch.id) + ') is already off')
     else:
         logger.warning('switch ' + switch.name + '(' + str(switch.id) + ') not enabled')
+    return False
 
 def decora(switch_name, command, brightness):
     logger.debug('switch:' + switch_name + ' command:' + str(command) + ' brightness: ' + brightness)
@@ -61,18 +65,18 @@ def decora(switch_name, command, brightness):
                                 attribs['power'] = 'ON'
                             else:
                                 attribs['power'] = 'OFF'
-                                logger.debug(switch.name + ':' + str(attribs))
+                                logger.info(switch.name + ':' + str(attribs))
                             switch.update_attributes(attribs)
                 Person.logout(session)
+                return True
             except ValueError as error:
                 logger.error(error)
                 pass
-
-
         else:
             logger.warning('Cannot connect to ' + ACCT_NAME + ' because the account is disabled')
     else:
         logger.error('No account ' + ACCT_NAME + ' exist')
+    return False
 
 
 def sync_decora():

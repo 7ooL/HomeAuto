@@ -5,6 +5,7 @@ from homeauto.api_infinitude.pyInfinitude import Infinitude
 from homeauto.models.infinity import Infinity, InfStatus, InfProfile, InfActivity
 from homeauto.house import register_hvac_event
 import logging, time
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -14,8 +15,8 @@ def connect(infinity):
     logger.debug('connecting to:' + infinity.name)
     hvacIP = infinity.ip
     hvacPort = infinity.port
-    hvacFile = 'homeauto/api_infinitude/' + str(hvacIP) + '_' + str(hvacPort) + '-file.json'
-    hvacStatus = 'homeauto/api_infinitude/' + str(hvacIP) + '_' + str(hvacPort) + '-status.json'
+    hvacFile = str(Path(__file__).parent.absolute())+'/api_infinitude/' + str(hvacIP) + '_' + str(hvacPort) + '-file.json'
+    hvacStatus = str(Path(__file__).parent.absolute())+'/api_infinitude/' + str(hvacIP) + '_' + str(hvacPort) + '-status.json'
     return Infinitude(hvacIP, hvacPort, hvacFile, hvacStatus)
 
 

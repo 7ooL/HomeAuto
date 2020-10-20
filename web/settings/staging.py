@@ -31,13 +31,13 @@ LOGGING = {
         'simple': {
 #            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
             '()': 'djangocolors_formatter.DjangoColorsFormatter',
-            'format': '{levelname}:{module}:{funcName}: {message}',
+            'format': '{levelname} {module} {funcName} : {message}',
             'style': '{',
         },
         'verbose': {
 #            'format': '{levelname} {message}',
 #            '()': 'djangocolors_formatter.DjangoColorsFormatter',
-            'format': '{asctime}-{levelname}:{filename}:{module}:{funcName}: {message}',
+            'format': '{asctime}-{levelname} {filename} {module} {funcName} : {message}',
             'style': '{',
         },
     },

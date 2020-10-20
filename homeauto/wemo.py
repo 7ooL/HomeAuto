@@ -10,11 +10,13 @@ def turn_on_light(device):
             cmd = '/usr/local/bin/wemo switch "' + device.name + '" on'
             proc = subprocess.Popen([cmd], stdout=(subprocess.PIPE), shell=True)
             out, err = proc.communicate()
-            logger.debug(cmd)
+            logger.info(cmd)
+            return True
         else:
             logger.debug('device ' + device.name + '(' + str(device.id) + ') is already on')
     else:
         logger.warning('device ' + device.name + '(' + str(device.id) + ') not enabled')
+    return False
 
 
 def turn_off_light(device):
@@ -23,11 +25,13 @@ def turn_off_light(device):
             cmd = '/usr/local/bin/wemo switch "' + device.name + '" off'
             proc = subprocess.Popen([cmd], stdout=(subprocess.PIPE), shell=True)
             out, err = proc.communicate()
-            logger.debug(cmd)
+            logger.info(cmd)
+            return True
         else:
             logger.debug('device ' + device.name + '(' + str(device.id) + ') is already off')
     else:
         logger.warning('device ' + device.name + '(' + str(device.id) + ') not enabled')
+    return False
 
 
 def sync_wemo():

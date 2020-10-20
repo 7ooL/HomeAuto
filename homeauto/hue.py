@@ -42,6 +42,27 @@ def play_scene(scene):
     payload = {'scene': scene.id}
     put_command(api_url, payload)
 
+def convert_trans_time(transtime):
+    # transtime should come in as seconds, convert to multiple of 100ms
+    tt = ((transtime*1000)/100)
+    # max time allowed by hue lights, it will fail to set otherwise, i think this is 1.5 hours
+    if tt > 65535:
+        tt = 65543
+    return tt
+
+def set_scene_trans_time(scene, transtime):
+    transtime = convert_trans_time(transtime)
+    if transtime > 0:
+        # get the current light states in the scene to update transition times
+        api_url='http://'+ scene.bridge.ip +'/api/'+ scene.bridge.username +'/scenes/'+ str(scene.id)
+        r = requests.get(api_url)
+        json_str = json.dumps(r.json())
+        json_objects = json.loads(json_str)
+        for lights in json_objects['lightstates'].items():
+            lights[1]['transitiontime'] = int(transtime)
+            api_url='http://'+ scene.bridge.ip +'/api/'+ scene.bridge.username +'/scenes/'+ str(scene.id) +'/lightstates/'+ lights[0]
+            payload = lights[1]
+            put_command(api_url, payload)
 
 def sync_groups():
     logger.debug('Syncing Hue Groups')

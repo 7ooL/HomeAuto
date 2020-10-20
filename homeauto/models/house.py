@@ -7,7 +7,7 @@ from django.utils import timezone
 from .hue import Group, Sensor, Scene
 from .wemo import Wemo
 from .decora import Switch
-from .vivint import Device
+from .vivint import Device, Panel
 from .infinity import Infinity
 
 #import apscheduler.job as Test
@@ -161,6 +161,7 @@ class HouseSchedule(Common):
     source_id = models.IntegerField(default=-1)
 
 class Trigger(Common):
+    DEFAULT = '-----'
     MOTION = 'Motion'
     SCHEDULE = 'External Schedule Start'
     WINDOW ='Time Window'
@@ -180,6 +181,7 @@ class Trigger(Common):
     CUSTOM_EVENT = "Events"
 
     TRIGGER_TYPES =[
+        ((DEFAULT,DEFAULT)),
         ('Time' ,(
 	        (SCHEDULE, SCHEDULE),
 	        (WINDOW, WINDOW),
@@ -212,17 +214,19 @@ class Trigger(Common):
 
 
     ]
-    trigger = models.CharField(max_length=60,choices=TRIGGER_TYPES, default=MOTION)
+    trigger = models.CharField(max_length=60,choices=TRIGGER_TYPES, default=DEFAULT)
     motion_detector = models.OneToOneField(HouseMotionDetector, on_delete=models.CASCADE, blank=True, null=True)
     sensor = models.OneToOneField(HouseSensor, on_delete=models.CASCADE, blank=True, null=True)
     lock = models.OneToOneField(HouseLock, on_delete=models.CASCADE, blank=True, null=True)
     window_start = models.TimeField(default=timezone.now)
     window_end = models.TimeField(default=timezone.now)
-    external_schedule =  models.OneToOneField(HouseSchedule, on_delete=models.CASCADE, blank=True, null=True)
+    external_schedule =  models.ForeignKey(HouseSchedule, on_delete=models.CASCADE, blank=True, null=True)
+    external_schedule_delay = models.IntegerField(default=-1, verbose_name='Delay behind external schedule (minutes)')
     people =  models.ManyToManyField(Person, blank=True)
     people_has_left = models.BooleanField(default=False)
     people_has_arrived = models.BooleanField(default=False)
-    armed_state =  models.CharField(max_length=60,choices=Common.ARM_STATES, default=Common.DISARMED)
+    security_panel = models.ForeignKey(Panel, on_delete=models.CASCADE, blank=True, null=True)
+    security_armed_state =  models.CharField(max_length=60,choices=Common.ARM_STATES, default=Common.DISARMED, verbose_name="Armed State (requires people be defined")
     hvac_unit = models.ManyToManyField(Infinity, blank=True)
     hvac_profile = models.CharField(max_length=60,choices=Common.HVAC_PROFILES, default=Common.HOME)
     hvac_value = models.IntegerField(default=0)
@@ -274,12 +278,13 @@ class Action(Common):
     action = models.CharField(max_length=60,choices=ACTION_TYPES, default=TURN_ON)
     lights = models.ManyToManyField(HouseLight, blank=True)
     scenes = models.ManyToManyField(Scene,blank=True)
+    scenes_transition_time = models.IntegerField(default=4,verbose_name='Transition Time (seconds)') 
     people = models.ManyToManyField(Person,blank=True)
     text_message = models.CharField(max_length=120, default="", blank=True, null=True)
     hvac_unit = models.ManyToManyField(Infinity, blank=True)
     hvac_actions = models.CharField(max_length=60,choices=HVAC_ACTIONS, default=REMOVE_HOLD)
     people =  models.ManyToManyField(Person, blank=True)
-    action_grace_period = models.IntegerField(default=-1)
+    action_grace_period = models.IntegerField(default=-1, verbose_name='Grace Period (minutes)')
     last_action_time = models.DateTimeField(default=timezone.now,blank=True, null=True)
 
 

@@ -12,13 +12,6 @@ class Common(models.Model):
     class Meta:
         abstract = True
         ordering = ['name']
-    def __str__(self):
-        if self.enabled:
-          enabled = "ENABLED"
-        else:
-          enabled = "DISABLED"
-        return '{} - {}'.format(self.name, enabled)
-
 
 class Device(Common):
     type = models.CharField(max_length=30)
