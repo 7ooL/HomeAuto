@@ -10,74 +10,68 @@ import homeauto.hue as HueAction
 import homeauto.wemo as WemoAction
 import homeauto.decora as DecoraAction
 from datetime import timedelta
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
 logger = logging.getLogger(__name__)
 
 # this is for intercepting databse updates
-@receiver(pre_save, sender=Person)
+@receiver(post_save, sender=Person)
 def register_person_event(sender, instance, **kwargs):
+    logger.info("Person:{"+instance.user.username+"} is home {"+str(instance.is_home)+"}")
     if instance.is_home:
-        try:
-            t = Trigger.objects.get(trigger=(Trigger.PEOPLE), people_has_arrived=True, people=instance)
+        triggers = Trigger.objects.filter(trigger=(Trigger.PEOPLE), people_has_arrived=True, people=instance)
+        for t in triggers:
+            results = []
+            logger.debug('Evaluating: ' + t.name + "  ("+str(t.people.count())+" people)")
             if t.enabled:
                 if t.people.count() > 1:
                     for person in t.people.all():
-                        if not person.is_home:
-                            eval = False
-                            logger.debug(person.user.username + ' found not to be home')
-                            return
-                        else:
-                            eval = True
-
-                    logger.debug('Trigger:{' + t.name + '}{' + str(t.id) + '}{fired}')
-                else:
-                    logger.debug('Trigger:{' + t.name + '}{' + str(t.id) + '}{fired}')
-                    eval = True
-            else:
-                logger.debug('Trigger:{' + t.name + '}{' + str(t.id) + '}{disabled}')
-                eval = False
-        except Exception as e:
-            try:
-                eval = False
-            finally:
-                e = None
-                del e
-        if eval:
-            evaluate_nuggets(t.id)
-    else:
-        try:
-            t = Trigger.objects.get(trigger=(Trigger.PEOPLE), people_has_arrived=False, people=instance)
-            if t.enabled:
-                if t.people.count() > 1:
-                    for person in t.people.all():
+#                        person = Person.objects.get(id=person.id)
                         if person.is_home:
-                            eval = False
-                            logger.debug(person.user.username + ' found to still be home')
-                            return
+                            logger.debug('arrive:'+person.user.username + ' is home, matching trigger: '+t.name)
+                            results.append(True)
                         else:
-                            eval = True
-
-                    logger.debug('Trigger:{' + t.name + '}{' + str(t.id) + '}{fired}')
+                            logger.debug('arrive:'+person.user.username + ' is not home, not matching trigger: '+t.name)
+                            results.append(False)
                 else:
-                    logger.debug('Trigger:{' + t.name + '}{' + str(t.id) + '}{fired}')
-                    eval = True
+                    results.append(True)
             else:
                 logger.debug('Trigger:{' + t.name + '}{' + str(t.id) + '}{disabled}')
-                eval = False
-        except Exception as e:
-            try:
-                eval = False
-            finally:
-                e = None
-                del e
-        if eval:
-            evaluate_nuggets(t.id)
+                results.append(False)
+            logger.debug("  Results: "+str(results))
+            if all(results):
+                logger.debug('Trigger:{' + t.name + '}{' + str(t.id) + '}{fired}')
+                evaluate_nuggets(t.id)
+
+    else:
+        triggers = Trigger.objects.filter(trigger=(Trigger.PEOPLE), people_has_left=True, people=instance)
+        for t in triggers:
+            results = []
+            logger.debug('Evaluating: ' + t.name + "  ("+str(t.people.count())+" people)")
+            if t.enabled:
+                if t.people.count() > 1:
+                    for person in t.people.all():
+ #                       person = Person.objects.get(id=person.id)
+                        if not person.is_home:
+                            logger.debug('leave:'+person.user.username + ' is not home, matching trigger: '+t.name)
+                            results.append(True)
+                        else:
+                            logger.debug('leave:'+person.user.username + ' is home, NOT matching trigger: '+t.name)
+                            results.append(False)
+                else:
+                    results.append(True)
+            else:
+                logger.debug('Trigger:{' + t.name + '}{' + str(t.id) + '}{disabled}')
+                results.append(False)
+            logger.debug("  Results: "+str(results))
+            if all(results):
+                logger.debug('Trigger:{' + t.name + '}{' + str(t.id) + '}{fired}')
+                evaluate_nuggets(t.id)
 
 
 def register_watcher_event(event):
-    logger.warning(event)
+#    logger.warning(event)
     if event.event_type == 'created':
         logger.debug('Received created event - %s.' % event.src_path)
         with open(event.src_path) as f:
@@ -114,17 +108,17 @@ def register_watcher_event(event):
                         evaluate_nuggets(t.id)
 
             elif len(s) == 2:
-                key = s[0]
+                key = s[0].lower()
                 value = s[1]
                 logger.info('Found:{' + key + '}{' + value+"}")
-                if key.lower() == 'arrive':
+                if key == 'arrive':
                     p = Person.objects.get(user__username=value)
                     if p:
                         p.is_home = True
                         p.save()
                     else:
                         logger.error('No person was found with the username: ' + str(value))
-                elif key.lower() == 'leave':
+                elif key == 'leave':
                     p = Person.objects.get(user__username=value)
                     if p:
                         p.is_home = False
@@ -296,10 +290,10 @@ def evaluate_nuggets(t_id):
         if is_nugget_runable(nug):
             triggers = nug.triggers.all()
             results = []
-            logger.warning('Evaluating: ' + nug.name + " with "+str(len(triggers))+" trigger(s)")
+            logger.debug('Evaluating: ' + nug.name + "  ("+str(len(triggers))+" triggers)")
             for t in triggers:
                 if t.id == t_id:
-                    logger.debug('TEST:  ' + t.name + ' ' + str(t.id) + ' True')
+                    logger.debug('  TEST:  ' + t.name + ' ' + str(t.id) + ' True')
                     results.append(True)
                 else:
                     if t.trigger == t.MOTION:
@@ -312,20 +306,20 @@ def evaluate_nuggets(t_id):
                             else:
                                 state = False
                             results.append(state)
-                            logger.debug('TEST:  ' + nug.name + ':Vivint:' + t.motion_detector.name + ' state ' + str(state))
+                            logger.debug('  TEST:  ' + nug.name + ':Vivint:' + t.motion_detector.name + ' state ' + str(state))
                         elif t.motion_detector.source == 1:
                             state = Sensor.objects.get(id=(t.motion_detector.source_id)).presence
-                            logger.debug('TEST:  ' + nug.name + ':Hue:' + t.motion_detector.name + ' state ' + str(state))
+                            logger.debug('  TEST:  ' + nug.name + ':Hue:' + t.motion_detector.name + ' state ' + str(state))
                             results.append(state)
                         else:
                             logger.warning('There is no motion state lookup for source ' + str(t.motion_detector_id__source))
                             results.append(False)
                     elif t.trigger == t.WINDOW:
                         if t.window_start <= timezone.localtime().time() <= t.window_end:
-                            logger.debug("TEST:  "+t.name + ' timeframe state True')
+                            logger.debug("  TEST:  "+t.name + ' timeframe state True')
                             results.append(True)
                         else:
-                            logger.debug("TEST:  "+t.name + ' timeframe state False')
+                            logger.debug("  TEST:  "+t.name + ' timeframe state False')
                             results.append(False)
                     elif t.trigger == t.SCHEDULE:
                         logger.error('code has not been written for SCHEDULE trigger')
@@ -369,20 +363,20 @@ def evaluate_nuggets(t_id):
                     elif t.trigger == t.SECURITY_ARMED_STATE:
                         state = Panel.objects.get(id=(t.security_panel.id)).armed_state
                         if state == t.security_armed_state:
-                            logger.debug("TEST:  "+t.security_armed_state+' matches armed state '+state)
+                            logger.debug("  TEST:  "+t.security_armed_state+' matches armed state '+state)
                             results.append(True)
                         else:
-                            logger.debug("TEST:  "+t.security_armed_state+' does not match armed state '+state)
+                            logger.debug("  TEST:  "+t.security_armed_state+' does not match armed state '+state)
                             results.append(False)
                     elif t.trigger == t.PEOPLE:
                         if t.people_has_left:
                             try:
                                 for person in t.people.all():
-                                    if not person.is_home:
-                                        logger.debug("TEST:  "+person.user.username + ' found not to be home')
+                                    if person.is_home:
+                                        logger.debug("  TEST:  "+person.user.username + ' found to be home False')
                                         results.append(False)
                                     else:
-                                        logger.debug("TEST:  "+person.user.username + ' found to be home')
+                                        logger.debug("  TEST:  "+person.user.username + ' found to be not home True')
                                         results.append(True)
                             except:
                                 results.append(False)
@@ -390,16 +384,16 @@ def evaluate_nuggets(t_id):
                             try:
                                 for person in t.people.all():
                                     if person.is_home:
-                                        logger.debug("TEST:  "+person.user.username + ' found to be home')
+                                        logger.debug("  TEST:  "+person.user.username + ' found to be home True')
                                         results.append(True)
                                     else:
-                                        logger.debug("TEST:  "+person.user.username + ' found not to be home')
-                                        results.append(True)
+                                        logger.debug("  TEST:  "+person.user.username + ' found not to be home False')
+                                        results.append(False)
                             except:
                                 results.append(False)
                     else:
                         logger.error('No nugget evaluation has been defined for: ' + t.trigger)
-            logger.debug("Results: "+str(results))
+            logger.debug("  Results: "+str(results))
             if all(results):
                 execute_actions(nug.id)
         else:
@@ -414,7 +408,7 @@ def execute_actions(n_id):
                 run_action(action)
                 logger.debug("execute_actions:{"+action.name+"}{"+str(action.id)+"}{"+action.action+"}{"+str(action.enabled)+"}{"+nug.name+"}{"+str(nug.id)+"}")
             else:
-                logger.debug('Not running action as it has run within the grace period of ' + str(action.action_grace_period))
+                logger.debug('Not running '+action.name+' as it is within the cool down period of ' + str(action.action_grace_period))
         else:
             logger.debug("execute_actions:{"+action.name+"}{"+str(action.id)+"}{"+action.action+"}{"+str(action.enabled)+"}{"+nug.name+"}{"+str(nug.id)+"}")
 

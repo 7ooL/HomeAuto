@@ -126,15 +126,6 @@ class Person(models.Model):
     def __str__(self):
         return '{} {}'.format(self.user.first_name, self.user.last_name)
 
-class Zone(Common):
-    huegroups = models.ManyToManyField(Group, blank=True)
-    sensors = models.ManyToManyField(Sensor, blank=True)
-    wemos = models.ManyToManyField(Wemo, blank=True)
-    decora = models.ManyToManyField(Switch, blank=True)
-    vivint = models.ManyToManyField(Device, blank=True)
-    def __str__(self):
-        return '{}'.format(self.name)
-
 class HouseMotionDetector(Common):
     source = models.IntegerField(choices=Common.SOURCE, default=-1)
     source_type = models.IntegerField(choices=Common.SOURCE_TYPE, default=-1)

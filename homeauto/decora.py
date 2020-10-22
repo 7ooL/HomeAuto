@@ -88,6 +88,9 @@ def sync_decora():
             session = DecoraWiFiSession()
             try:
                 session.login(getattr(decoraAcct, 'username'), getattr(decoraAcct, 'password'))
+            except ValueError as error:
+                logger.error("Unable to login to "+ACCT_NAME)
+            else:
                 perms = session.user.get_residential_permissions()
                 logger.debug('{} premissions'.format(len(perms)))
                 all_residences = []
@@ -178,9 +181,6 @@ def sync_decora():
                             logger.debug('Updating Decora Switch:' + data['name'])
                             (Switch.objects.filter(id=(data['id'])).update)(**data)
 
-            except ValueError as error:
-                logger.error(error)
-                pass
         else:
             logger.warning('Cannot sync Decora data because the account is disabled')
     else:

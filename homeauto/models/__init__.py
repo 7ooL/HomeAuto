@@ -1,6 +1,5 @@
 from .house import Common
 from .house import Person
-from .house import Zone
 from .house import Job
 from .house import HouseMotionDetector
 from .house import HouseLight
