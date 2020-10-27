@@ -1,4 +1,4 @@
-import logging, requests, json, smtplib, datetime, os, random
+import logging, requests, json, smtplib, datetime, os, random, sys
 from django.utils import timezone
 from django.contrib.auth.models import User
 from homeauto.models.hue import Sensor, Scene, Light, Group, Schedule
@@ -189,30 +189,50 @@ def register_sensor_event(source, device_id, state):
         evaluate_nuggets(t.id)
 
 
-def register_security_event(who, state):
-    who = who.split()
+def check_secuirty_trigger(t):
+    if t.enabled:
+        if t.security_armed_to:
+            logger.debug("Looking for triggers with security_armed_to flagged")
+            if trigger.people__user__first_name == who[0]:
+                logger.debug('Trigger:{' + t.name + '}{' + str(t.id) + '}{fired}')
+                evaluate_nuggets(t.id)
+        if t.security_changed_to:
+            logger.debug("Looking for triggers with security_changed_to flagged")
+            logger.debug('Trigger:{' + t.name + '}{' + str(t.id) + '}{fired}')
+            evaluate_nuggets(t.id)
+    else:
+        logger.debug('Trigger:{' + t.name + '}{' + str(t.id) + '}{disabled}')
+
+def register_security_event(the_who, state):
     try:
+        who = the_who.split()
         username = User.objects.get(first_name=(who[0]), last_name=(who[1])).username
         logger.info('Security{Vivint}{' + username + '} set house to {' + state+'}')
     except:
-        logger.info('Security{Vivint}{' + str(who[0]) + '} set house to {' + state+']')
-    try:
-        t = Trigger.objects.get(trigger=(Trigger.SECURITY_ARMED_STATE), people__user__first_name=(who[0]), security_armed_state=state)
-        if t.enabled:
-            logger.debug('Trigger:{' + t.name + '}{' + str(t.id) + '}{fired}')
-            eval = True
-        else:
-            logger.debug('Trigger:{' + t.name + '}{' + str(t.id) + '}{disabled}')
-            eval = False
-    except:
-        eval = False
+        logger.info('Security{Vivint}{' + who + '} set house to {' + state+']')
+    finally:
+        who = the_who.split()
 
-    if eval:
-        evaluate_nuggets(t.id)
+    try:
+        triggers = Trigger.objects.filter(trigger=(Trigger.SECURITY_ARMED_STATE), security_armed_state=state)
+    except:
+        logger.error(sys.exc_info()[0])
+    else:
+        logger.debug('found '+str(triggers.count())+' tiggers with '+state)
+        if triggers.count() > 1:
+            for trigger in triggers:
+                 check_secuirty_trigger(trigger)
+        else:
+            check_secuirty_trigger(triggers.first())
+
 
 
 def register_hvac_event(who, what, oldValue, newValue):
-    logger.info('Hvac:{' + who + '}{' + what + '} changed from {' + str(oldValue) + '}to{' + str(newValue)+"}")
+    try:
+        v = float(oldValue)
+        logger.info('HvacValue:{' + who + '}{' + what + '}{' + str(oldValue) + '}{' + str(newValue)+"}")
+    except:
+        logger.info('HvacStatus:{' + who + '}{' + what + '}{' + str(oldValue) + '}{' + str(newValue)+"}")
 
 
 def register_time_event(t):
@@ -414,6 +434,7 @@ def execute_actions(n_id):
 
 
 def run_action(action):
+    logger.debug("Attempting to run "+action.name)
     if action.action == action.PLAY_SCENE:
         scenes = action.scenes.all()
         if scenes:
@@ -436,6 +457,15 @@ def run_action(action):
             # reset scene states to fast
             HueAction.set_scene_trans_time(s,3)
             update_last_run(action)
+        else:
+            logger.error("run_action:{"+action.name+"}{failed}{Query set is empty}")
+    elif action.action == action.FLASH_SCENE:
+        scenes = action.scenes.all()
+        if scenes:
+            for scene in scenes:
+                HueAction.flash_scene(scene)
+                update_last_run(action)
+
         else:
             logger.error("run_action:{"+action.name+"}{failed}{Query set is empty}")
     elif action.action == action.TURN_ON:
@@ -545,18 +575,7 @@ def run_action(action):
 
 def update_last_run(action):
     Action.objects.filter(id=(action.id)).update(last_action_time=(timezone.localtime()))
-    logger.debug("run_action:{"+action.name+"}{success}")
-
-def put_command(api_url, payload):
-    try:
-        r = requests.put(api_url, data=(json.dumps(payload)))
-        logger.info(r.text)
-        if 'error' in r.text:
-            logger.error(r.text)
-    except:
-        logger.error('except ' + str(api_url))
-        logger.error('except ' + str(payload))
-
+    logger.info("run_action:{"+action.name+"}{success}")
 
 def send_text(phone, message):
     logger.debug('attempting to send text ' + message)

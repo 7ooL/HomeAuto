@@ -91,7 +91,7 @@ LOGGING = {
         },
         'homeauto.decora': {
             'handlers': ['file', 'console'],
-            'level': 'INFO',
+            'level': 'DEBUG',
         },
         'homeauto.watcher': {
             'handlers': ['file', 'console'],
@@ -233,6 +233,7 @@ ADMIN_REORDER = (
        {'model': 'homeauto.Scene', 'label': 'Hue Scenes'},
        {'model': 'homeauto.Sensor', 'label': 'Hue Sensors'},
        {'model': 'homeauto.Schedule', 'label': 'Hue Schedules'},
+       {'model': 'homeauto.SceneLightstate', 'label': 'Hue Lightstates'},
        {'model': 'homeauto.Device', 'label': 'Vivint Devices'},
        {'model': 'homeauto.Panel', 'label': 'Vivint Panels'},
     )},

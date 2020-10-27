@@ -1,7 +1,7 @@
 from homeauto.api_vivint.pyvivintsky.vivint_sky import VivintSky
 from homeauto.models.house import Account
 from homeauto.models.vivint import Panel, Device
-import asyncio, logging, warnings
+import asyncio, logging, warnings, time
 import homeauto.jobs as jobs
 
 logger = logging.getLogger(__name__)
@@ -19,11 +19,22 @@ def start():
             asyncio.run(session.login())
             asyncio.run(session.connect_panel())
             asyncio.run(session.connect_pubnub())
+            logger.debug("Session Expires: "+str(session.get_session()['expires']))
+            keep_alive(session)
         else:
             logger.warning('Cannot connect to Vivint because the account is disabled')
     else:
         logger.error('Cannot connect to Vivint because no Account information for ' + ACCT_NAME + ' exist')
 
+def keep_alive(session):
+    alive = True
+    while alive:
+        if session.session_valid():
+            time.sleep(5)
+        else:
+            alive = False
+    session.disconnect()
+    start()
 
 def sync_vivint_sensors():
     warnings.filterwarnings('ignore')

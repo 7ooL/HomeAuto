@@ -35,7 +35,8 @@ class Watcher:
                 time.sleep(5)
         except:
             self.observer.stop()
-            logger.error('Error')
+            logger.error('Error, attempting to restart')
+            start()
         self.observer.join()
 
 

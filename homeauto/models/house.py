@@ -217,7 +217,9 @@ class Trigger(Common):
     people_has_left = models.BooleanField(default=False)
     people_has_arrived = models.BooleanField(default=False)
     security_panel = models.ForeignKey(Panel, on_delete=models.CASCADE, blank=True, null=True)
-    security_armed_state =  models.CharField(max_length=60,choices=Common.ARM_STATES, default=Common.DISARMED, verbose_name="Armed State (requires people be defined")
+    security_armed_to = models.BooleanField(default=False, verbose_name="When person sets state to")
+    security_changed_to = models.BooleanField(default=False, verbose_name="When state changes to")
+    security_armed_state =  models.CharField(max_length=60,choices=Common.ARM_STATES, default=Common.DISARMED, verbose_name="Armed State")
     hvac_unit = models.ManyToManyField(Infinity, blank=True)
     hvac_profile = models.CharField(max_length=60,choices=Common.HVAC_PROFILES, default=Common.HOME)
     hvac_value = models.IntegerField(default=0)
@@ -228,6 +230,7 @@ class Trigger(Common):
 class Action(Common):
     PLAY_SCENE = 'Play Scenes'
     PLAY_RANDOM_SCENE = 'Play Random Scene'
+    FLASH_SCENE = 'Flash Scene'
     TURN_ON = 'Turn On Lights'
     TURN_OFF = 'Turn Off Lights'
     BLINK_HUE = 'Blink Hue Groups'
@@ -243,6 +246,7 @@ class Action(Common):
 	        (PLAY_SCENE,PLAY_SCENE),
 	        (PLAY_RANDOM_SCENE,PLAY_RANDOM_SCENE),
 	        (BLINK_HUE,BLINK_HUE),
+                (FLASH_SCENE,FLASH_SCENE),
         )),
         ('Notifications',(
 	        (SEND_TEXT,SEND_TEXT),

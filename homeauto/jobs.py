@@ -5,6 +5,8 @@ from datetime import datetime
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django_apscheduler.jobstores import register_events, register_job, DjangoJobStore
+from django.db.models.signals import pre_save, post_save
+from django.dispatch import receiver
 from homeauto.models.house import Job, HouseMotionDetector, HouseLight, HouseLock, HouseSensor, Trigger, HouseSchedule
 from homeauto.models.hue import Sensor, Light, Group, Scene, Schedule
 from homeauto.models.wemo import Wemo
@@ -29,6 +31,10 @@ def start():
     for job in Job.objects.all():
         review_job(job)
 
+#@receiver(post_save, sender=Job)
+#def receive_job_update(sender, instance, **kwargs):
+#    logger.info("Update for "+instance.COMMAND_TYPES[(job.command + 1)][1])
+#    review_job(instance)
 
 def review_job(job):
     logger.debug('Reviewing job ' + job.COMMAND_TYPES[(job.command + 1)][1])
