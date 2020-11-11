@@ -1,4 +1,4 @@
-import logging, requests, json, smtplib, datetime, os, random, sys
+import logging, requests, json, smtplib, datetime, os, random, sys, subprocess
 from django.utils import timezone
 from django.contrib.auth.models import User
 from homeauto.models.hue import Sensor, Scene, Light, Group, Schedule
@@ -29,10 +29,10 @@ def register_person_event(sender, instance, **kwargs):
                     for person in t.people.all():
 #                        person = Person.objects.get(id=person.id)
                         if person.is_home:
-                            logger.debug('arrive:'+person.user.username + ' is home, matching trigger: '+t.name)
+                            logger.debug('  TEST (arrive): '+person.user.username + ' is home, matching trigger: '+t.name)
                             results.append(True)
                         else:
-                            logger.debug('arrive:'+person.user.username + ' is not home, not matching trigger: '+t.name)
+                            logger.debug('  TEST (arrive): '+person.user.username + ' is not home, not matching trigger: '+t.name)
                             results.append(False)
                 else:
                     results.append(True)
@@ -54,10 +54,10 @@ def register_person_event(sender, instance, **kwargs):
                     for person in t.people.all():
  #                       person = Person.objects.get(id=person.id)
                         if not person.is_home:
-                            logger.debug('leave:'+person.user.username + ' is not home, matching trigger: '+t.name)
+                            logger.debug('  TEST (leave): '+person.user.username + ' is not home, matching trigger: '+t.name)
                             results.append(True)
                         else:
-                            logger.debug('leave:'+person.user.username + ' is home, NOT matching trigger: '+t.name)
+                            logger.debug('  TEST (leave): '+person.user.username + ' is home, NOT matching trigger: '+t.name)
                             results.append(False)
                 else:
                     results.append(True)
@@ -73,8 +73,9 @@ def register_person_event(sender, instance, **kwargs):
 def register_watcher_event(event):
 #    logger.warning(event)
     if event.event_type == 'created':
-        logger.debug('Received created event - %s.' % event.src_path)
+        logger.info('Received created event - %s.' % event.src_path)
         with open(event.src_path) as f:
+            logger.info(subprocess.run(['cat', event.src_path], stdout=subprocess.PIPE))
             if not f.readline().rstrip():
                 logger.error('Input file is empty')
                 remove_file(event.src_path)
@@ -135,7 +136,10 @@ def register_watcher_event(event):
 def remove_file(path):
     if os.path.isfile(path):
         logger.debug('removeing ' + path)
-        os.remove(path)
+        try:
+            os.remove(path)
+        except:
+            logger.error("Unexpected error:"+ str(sys.exc_info()[0]))
 
 
 def register_motion_event(source, device_id):
@@ -569,6 +573,24 @@ def run_action(action):
                 update_last_run(action)
         else:
             logger.error("run_action:{"+action.name+"}{failed}{Query set is empty}")
+    elif action.action == action.DISABLE_TRIGGER:
+        triggers = action.triggers.all()
+        if triggers.count() == 0:
+            logger.warning("No triggers defined to disable")
+        else:
+            for t in triggers:
+                t.enabled = False
+                t.save()
+                update_last_run(action)
+    elif action.action == action.ENABLE_TRIGGER:
+        triggers = action.triggers.all()
+        if triggers.count() == 0:
+            logger.warning("No triggers defined to disable")
+        else:
+            for t in triggers:
+                t.enabled = True
+                t.save()
+                update_last_run(action)
     else:
         logger.error("run_action:{"+action.name+"}{failed}{No action code has been developed for this type}")
 

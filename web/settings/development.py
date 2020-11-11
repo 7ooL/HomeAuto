@@ -1,29 +1,32 @@
-
 import os
-import web.secret as secret
+import web.settings.common_config  as config
+import web.settings.secret as secret
 
-#import logging.config
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = secret.SECRET_KEY
-
-os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
-
-#SECURE_HSTS_SECONDS = 300
-#SECURE_SSL_REDIRECT = True
-#SESSION_COOKIE_SECURE = True
-#CSRF_COOKIE_SECURE = True
-#SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-#SECURE_HSTS_PRELOAD = True
-
+ALLOWED_HOSTS = secret.ALLOWED_HOSTS
+BASE_DIR = config.BASE_DIR
+INSTALLED_APPS = config.INSTALLED_APPS
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+SCHEDULER_CONFIG = config.SCHEDULER_CONFIG
+SCHEDULER_AUTOSTART = config.SCHEDULER_AUTOSTART
+MIDDLEWARE = config.MIDDLEWARE
+ROOT_URLCONF = config.ROOT_URLCONF
+TEMPLATES = config.TEMPLATES
+WSGI_APPLICATION = 'web.wsgi.application'
+AUTH_PASSWORD_VALIDATORS = config.AUTH_PASSWORD_VALIDATORS
+LANGUAGE_CODE = config.LANGUAGE_CODE
+TIME_ZONE = config.TIME_ZONE
+USE_I18N = config.USE_I18N
+USE_L10N = config.USE_L10N
+USE_TZ = config.USE_TZ
+STATIC_URL = config.STATIC_URL
+STATIC_ROOT = config.STATIC_ROOT
+
+
+# logging settings used for development 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -91,7 +94,7 @@ LOGGING = {
         },
         'homeauto.decora': {
             'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
         'homeauto.watcher': {
             'handlers': ['file', 'console'],
@@ -117,75 +120,6 @@ LOGGING = {
     },
 }
 
-
-
-ALLOWED_HOSTS = secret.ALLOWED_HOSTS
-
-
-# Application definition
-
-INSTALLED_APPS = [
-#    'homeauto.apps.AppAdminConfig',
-    'admin_reorder',
-    'homeauto.apps.Config',
-#    'homeauto.api_decora.decora_wifi',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django_apscheduler',
-#    'homeauto.apps.AppAdmin',
-#    'home_auto.models.Service',
-#    'home_auto.models.Person',
-#    'homeauto.models.Wemo',
-#    'home_auto.models.Device',
-]
-
-# This scheduler config will:
-# - Store jobs in the project database
-# - Execute jobs in threads inside the application process
-SCHEDULER_CONFIG = {
-    "apscheduler.jobstores.default": {
-        "class": "django_apscheduler.jobstores:DjangoJobStore"
-    },
-    'apscheduler.executors.processpool': {
-        "type": "threadpool"
-    },
-}
-SCHEDULER_AUTOSTART = True
-
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'admin_reorder.middleware.ModelAdminReorder',
-]
-
-ROOT_URLCONF = 'web.urls'
-
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ["home_auto/templates/"],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
-
-WSGI_APPLICATION = 'web.wsgi.application'
 
 # ADMIN REORDER
 ADMIN_REORDER = (
@@ -252,42 +186,3 @@ DATABASES = {
         },
     }
 }
-
-# Password validation
-# https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/2.2/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'America/New_York'
-
-USE_I18N = True
-
-USE_L10N = True
-
-USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.2/howto/static-files/
-
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')

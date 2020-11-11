@@ -1,6 +1,6 @@
 from django.conf import settings
 from homeauto.models.hue import Group, Light, Scene, Bridge, SceneLightstate, Sensor, Schedule
-import requests, json, pytz, time
+import requests, json, pytz, time, sys
 from datetime import datetime
 import subprocess, logging
 from homeauto.house import register_motion_event
@@ -10,37 +10,43 @@ logger = logging.getLogger(__name__)
 def turn_on_light(light):
     api_url = 'http://' + light.bridge.ip + '/api/' + light.bridge.username + '/lights/' + str(light.id) + '/state'
     payload = {'on':True,  'transitiontime':100}
-    put_command(api_url, payload)
+    if put_command(api_url, payload):
+        logger.info(light.name)
 
 
 def turn_off_light(light):
     api_url = 'http://' + light.bridge.ip + '/api/' + light.bridge.username + '/lights/' + str(light.id) + '/state'
     payload = {'on':False,  'transitiontime':100}
-    put_command(api_url, payload)
+    if put_command(api_url, payload):
+        logger.info(light.name)
 
 
 def turn_off_group(group):
     api_url = 'http://' + group.bridge.ip + '/api/' + group.bridge.username + '/groups/' + str(group.id) + '/action'
     payload = {'on':False,  'transitiontime':100}
-    put_command(api_url, payload)
+    if put_command(api_url, payload):
+        logger.info(group.name)
 
 
 def turn_on_group(group):
     api_url = 'http://' + group.bridge.ip + '/api/' + group.bridge.username + '/groups/' + str(group.id) + '/action'
     payload = {'on':True,  'transitiontime':100}
-    put_command(api_url, payload)
+    if put_command(api_url, payload):
+        logger.info(group.name)
 
 
 def blink_group(group):
     api_url = 'http://' + group.bridge.ip + '/api/' + group.bridge.username + '/groups/' + str(group.id) + '/action'
     payload = {'on':True,  'alert':'select'}
-    put_command(api_url, payload)
+    if put_command(api_url, payload):
+        logger.info(group.name)
 
 
 def play_scene(scene):
     api_url = 'http://' + scene.bridge.ip + '/api/' + scene.bridge.username + '/groups/' + str(scene.group.id) + '/action'
     payload = {'scene': scene.id}
-    put_command(api_url, payload)
+    if put_command(api_url, payload):
+        logger.info(scene.name)
 
 def create_scene(bridge, payload):
     api_url = 'http://' + bridge.ip + '/api/' + bridge.username + '/scenes/'
@@ -407,12 +413,16 @@ def sync_schedules():
 def put_command(api_url, payload):
     try:
         r = requests.put(api_url, data=(json.dumps(payload)))
-        logger.info(r.text)
+        logger.debug(r.text)
         if 'error' in r.text:
             logger.error(r.text)
+            return False
     except:
         logger.error('except ' + str(api_url))
         logger.error('except ' + str(payload))
+        logger.error("Unexpected error:"+ str(sys.exc_info()[0]))
+        return False
+    return True
 
 def post_command(api_url, payload):
     try:
@@ -424,6 +434,8 @@ def post_command(api_url, payload):
     except:
         logger.error('except ' + str(api_url))
         logger.error('except ' + str(payload))
+        logger.error("Unexpected error:"+ str(sys.exc_info()[0]))
+
         return None
     else:
         return r
@@ -436,13 +448,15 @@ def delete_command(api_url):
         else:
             logger.info(r.text)
     except:
-        logger.error('except ' + str(api_url))
+        logger.error(str(api_url))
+        logger.error("Unexpected error:"+ str(sys.exc_info()[0]))
 
 def get_command(api_url):
     try:
         r = requests.get(api_url)
     except:
-        logger.error('except ' + str(api_url))
+        logger.error(str(api_url))
+        logger.error("Unexpected error:"+ str(sys.exc_info()[0]))
     else:
         return r
     return None

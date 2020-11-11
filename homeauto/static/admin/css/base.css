@@ -240,6 +240,10 @@ p img, h1 img, h2 img, h3 img, h4 img, td img {
     white-space: nowrap;
 }
 
+a.redStrike {
+      text-decoration:line-through red;
+}
+
 /* TABLES */
 
 table {

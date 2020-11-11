@@ -3,6 +3,9 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from django.contrib.admin import AdminSite
 from django import forms
+from django.utils.html import format_html
+from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 import homeauto.models.watcher as watcher
 import homeauto.models.wemo as wemo
@@ -32,7 +35,41 @@ class AccountAdmin(admin.ModelAdmin):
 admin.site.register(house.Account, AccountAdmin)
 
 class NuggetAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id', 'enabled', 'only_execute_if_someone_is_home')
+
+    def trigger_name(self, obj):
+        display_text = "<br> ".join([
+            "<a href={}>{}</a>".format(reverse('admin:{}_{}_change'.format(trigger._meta.app_label, trigger._meta.model_name),args=(trigger.pk,)),trigger.name)
+             if trigger.enabled
+             else "<a class='redStrike' href={}>{}</a>".format(reverse('admin:{}_{}_change'.format(trigger._meta.app_label, trigger._meta.model_name),args=(trigger.pk,)),trigger.name)
+             for trigger in obj.triggers.all()
+        ])
+        if display_text:
+            return mark_safe(display_text)
+        return "-"
+
+    def action_name(self, obj):
+        display_text = "<br> ".join([
+            "<a href={}>{}</a>".format(reverse('admin:{}_{}_change'.format(action._meta.app_label, action._meta.model_name),args=(action.pk,)),action.name)
+             if action.enabled
+             else "<a class='redStrike' href={}>{}</a>".format(reverse('admin:{}_{}_change'.format(action._meta.app_label, action._meta.model_name),args=(action.pk,)),action.name)
+             for action in obj.actions.all()
+        ])
+        if display_text:
+            return mark_safe(display_text)
+        return "-"
+
+#    def trigger_count(self, obj):
+#        return obj.triggers.count()
+#    trigger_count.short_description = "Trigger Count"
+
+#    def action_count(self, obj):
+#        return obj.actions.count()
+#    action_count.short_description = "Action Count"
+
+    search_fields = ( 'name','triggers__name', 'actions__name')
+    list_filter = ('enabled', 'only_execute_if_someone_is_home')
+    list_display = ('name', 'id', 'enabled', 'only_execute_if_someone_is_home', 'trigger_name', 'action_name')
+
 admin.site.register(house.Nugget, NuggetAdmin)
 
 class HouseMotionDetectorAdmin(admin.ModelAdmin):

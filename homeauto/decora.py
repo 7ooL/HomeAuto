@@ -69,9 +69,8 @@ def decora(switch_name, command, brightness):
                             switch.update_attributes(attribs)
                 Person.logout(session)
                 return True
-            except ValueError as error:
-                logger.error(error)
-                pass
+            except:
+                logger.error("Unexpected error:"+ str(sys.exc_info()[0]))
         else:
             logger.warning('Cannot connect to ' + ACCT_NAME + ' because the account is disabled')
     else:
@@ -88,8 +87,8 @@ def sync_decora():
             session = DecoraWiFiSession()
             try:
                 session.login(getattr(decoraAcct, 'username'), getattr(decoraAcct, 'password'))
-            except ValueError as error:
-                logger.error("Unable to login to "+ACCT_NAME)
+            except:
+                logger.error("Unexpected error:"+ str(sys.exc_info()[0]))
             else:
                 perms = session.user.get_residential_permissions()
                 logger.debug('{} premissions'.format(len(perms)))

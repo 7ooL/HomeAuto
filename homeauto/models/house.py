@@ -239,6 +239,8 @@ class Action(Common):
     SECURITY_SET_STATE = 'Set Armed State'
     PEOPLE_LEAVE = "Mark People Away"
     PEOPLE_ARRIVE = "Mark People Home"
+    DISABLE_TRIGGER = "Disable Trigger"
+    ENABLE_TRIGGER = "Enable Trigger"
     ACTION_TYPES =[
         ('Alter Lights',(
 	        (TURN_ON,TURN_ON),
@@ -261,6 +263,11 @@ class Action(Common):
                 (PEOPLE_LEAVE,PEOPLE_LEAVE),
                 (PEOPLE_ARRIVE,PEOPLE_ARRIVE),
         )),
+        ('Trigger' ,(
+                (DISABLE_TRIGGER,DISABLE_TRIGGER),
+                (ENABLE_TRIGGER,ENABLE_TRIGGER),
+        )),
+
     ]
 
     REMOVE_HOLD = "Remove Hold"
@@ -279,35 +286,14 @@ class Action(Common):
     hvac_unit = models.ManyToManyField(Infinity, blank=True)
     hvac_actions = models.CharField(max_length=60,choices=HVAC_ACTIONS, default=REMOVE_HOLD)
     people =  models.ManyToManyField(Person, blank=True)
+    triggers = models.ManyToManyField(Trigger, blank=True)
     action_grace_period = models.IntegerField(default=-1, verbose_name='Grace Period (minutes)')
     last_action_time = models.DateTimeField(default=timezone.now,blank=True, null=True)
-
 
 class Nugget(Common):
     triggers =  models.ManyToManyField(Trigger, blank=False)
     actions = models.ManyToManyField(Action, blank=False)
     only_execute_if_someone_is_home = models.BooleanField(default=False)
-
-
-
-#class Action(Common):
-#    WEMO_ACTIONS = ((1,'Turn ON'),(0,'Turn Off'), (-1, 'None'))
-#    DECORA_ACTIONS = ((1,'Turn ON'),(0,'Turn Off'), (-1, 'None'))
-#    HUE_ACTIONS = ((1,'Turn ON'),(0,'Turn Off'),(3,'Play Scene'),(-1,'None'))
-#
-#    VIVINT_ACTIONS = ((3,'Arm Stay'),(2, 'Arm Away'), (0,'Disarmed'), (5,'Lock Door'),(6, 'Unlock Door'), (7,'Opem Garage'), (8,' Close Garage'),(-1,'None'))
-#    hue_action = models.IntegerField(choices=HUE_ACTIONS, default=-1)
-#    wemo_action = models.IntegerField(choices=WEMO_ACTIONS, default=-1)
-#    decora_action = models.IntegerField(choices=DECORA_ACTIONS, default=-1)
-#    vivint_action = models.IntegerField(choices=VIVINT_ACTIONS, default=-1)
-
-
-
-#    schedule = Test()
-#    zone = models.ManyToManyField(Zone)
-#    actions = models.ManyToManyField(Action)
-
-
 
 class Account(Common):
     username = models.CharField(max_length=30)
