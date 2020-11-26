@@ -241,7 +241,10 @@ p img, h1 img, h2 img, h3 img, h4 img, td img {
 }
 
 a.redStrike {
-      text-decoration:line-through red;
+   text-decoration:line-through red;
+   text-decoration-line: line-through red;
+   -webkit-text-decoration-line: line-through red;
+   -webkit-text-decoration-color: red;
 }
 
 /* TABLES */

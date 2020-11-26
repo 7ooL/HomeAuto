@@ -18,10 +18,13 @@ class Config(AppConfig):
         def thread_watcher(self, *args):
             while True:
                 for t in args:
-                    logger.info("checking "+t.getName()+", and it is alive:"+str(t.is_alive()))
+#                    logger.info("checking "+t.getName()+", and it is alive:"+str(t.is_alive()))
                     if not t.is_alive():
                         logger.warning("Thread "+t.getName()+" is not alive")
-                        self.start_threads(t)
+                        try:
+                            self.start_threads(t)
+                        except:
+                            logger.error("Unexpected error:"+ str(sys.exc_info()[0]))
                 time.sleep(5)
 
 

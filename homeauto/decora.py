@@ -1,7 +1,7 @@
 from django.conf import settings
 from homeauto.models.decora import Switch
 from homeauto.models.house import Account
-import json, subprocess, logging
+import json, subprocess, logging, sys
 from homeauto.api_decora.decora_wifi import DecoraWiFiSession
 from homeauto.api_decora.decora_wifi.models.person import Person
 from homeauto.api_decora.decora_wifi.models.residential_account import ResidentialAccount

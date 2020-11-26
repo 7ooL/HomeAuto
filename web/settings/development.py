@@ -86,7 +86,7 @@ LOGGING = {
         },
         'homeauto.wemo': {
             'handlers': ['file', 'console'],
-            'level': 'INFO',
+            'level': 'DEBUG',
         },
         'homeauto.hue': {
             'handlers': ['file', 'console'],

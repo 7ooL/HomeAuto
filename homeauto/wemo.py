@@ -60,7 +60,14 @@ def sync_wemo():
             for device in devices:
                 if not Wemo.objects.filter(name=(device[1])).exists():
                     logger.debug('Name: ' + str(device[1]) + ' does not exist')
-                    add(device)
+                    logger.debug(device)
+                    logger.info('Creating wemo:' + device[1])
+                    data = {}
+                    data['status'] = device[3]
+                    data['type'] = device[0]
+                    data['name'] = device[1]
+                    w = (Wemo.objects.create)(**data)
+                    w.save()
                 else:
                     xWemo = Wemo.objects.get(name=(device[1]))
                     if xWemo.type != device[0]:

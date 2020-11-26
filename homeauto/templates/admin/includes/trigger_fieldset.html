@@ -3,27 +3,200 @@
     {% if fieldset.description %}
         <div class="description">{{ fieldset.description|safe }}</div>
     {% endif %}
+
+
     {% for line in fieldset %}
-        <div class="form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+        {% for field in line %}
+            {% if field.field.name == "name" or  field.field.name == "enabled" or field.field.name == "trigger" %}
+                <div class="form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+            {% elif field.field.name == "motion_detector" %}
+                <div data-display="Motion"  class="div_content form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+            {% elif field.field.name == "sensor" %}
+                <div data-display="Sensor" class="div_content form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+            {% elif field.field.name == "lock" %}
+                <div data-display="Lock" class="div_content form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+            {% elif field.field.name == "window_start" or field.field.name == "window_end"  %}
+                <div data-display="Window" class="div_content form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+            {% elif "external_schedule" in field.field.name %}
+                <div data-display="Schedule" class="div_content form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+            {% elif "people" in field.field.name %}
+                <div data-display="People" class="div_content form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+            {% elif "security" in field.field.name %}
+                <div data-display="Security" class="div_content form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+            {% elif field.field.name == "hvac_unit" %}
+                <div data-display="HVAC" class="div_content form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+            {% elif field.field.name == "hvac_profile" %}
+                <div data-display="HVAC-profile" class="div_content form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+            {% elif field.field.name == "hvac_value" %}
+                <div data-display="HVAC-value" class="div_content form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+            {% elif field.field.name == "hvac_hold" %}
+                <div data-display="HVAC-hold" class="div_content form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+            {% elif field.field.name == "hvac_heat_mode" %}
+                <div data-display="HVAC-heatmode" class="div_content form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+            {% elif field.field.name == "event" %}
+                <div data-display="Events" class="div_content form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+            {% else %}
+                <div class="div_content form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+            {% endif %}
+        {% endfor %}
+
             {% if line.fields|length_is:'1' %}{{ line.errors }}{% endif %}
+
             {% for field in line %}
+
                 <div{% if not line.fields|length_is:'1' %} class="fieldBox{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% if not field.is_readonly and field.errors %} errors{% endif %}{% if field.field.is_hidden %} hidden{% endif %}"{% elif field.is_checkbox %} class="checkbox-row"{% endif %}>
+
                     {% if not line.fields|length_is:'1' and not field.is_readonly %}{{ field.errors }}{% endif %}
+
                     {% if field.is_checkbox %}
                         {{ field.field }}{{ field.label_tag }}
+
                     {% else %}
                         {{ field.label_tag }}
                         {% if field.is_readonly %}
                             <div class="readonly">{{ field.contents }}</div>
                         {% else %}
-                            {{ field.field }}
+
+                            {{ field.field.choices }}
+                            {{ field.choices }}
+
+                            {% if field.field.name == "trigger" %}
+
+                            <select name="trigger" id="id_trigger">
+                                <option value="-----" selected="">-----</option>
+                                <optgroup label="Time">
+                                    <option data-display="Schedule" value="External Schedule Start">External Schedule Start</option>
+                                    <option data-display="Window" value="Time Window">Time Window</option>
+                                </optgroup>
+                                <optgroup label="Sensors">
+                                    <option data-display="Motion" value="Motion">Motion</option>
+                                    <option data-display="Sensor" value="Sensor Opened">Sensor Opened</option>
+                                    <option data-display="Sensor" value="Sensor Closed">Sensor Closed</option>
+                                    <option data-display="Lock" value="Lock is Unlocked">Lock is Unlocked</option>
+                                    <option data-display="Lock" value="Lock is Locked">Lock is Locked</option>
+                                </optgroup>
+                                <optgroup label="HVAC">
+                                    <option data-display="HVAC-profile" value="Currenty Activity">Currenty Activity</option>
+                                    <option data-display="HVAC-profile" value="Fan">Fan</option>
+                                    <option data-display="HVAC-value" value="Hits Temperature">Hits Temperature</option>
+                                    <option value="Hold Setting">Hold Setting</option>
+                                    <option value="Heat Mode">Heat Mode</option>
+                                    <option value="Filter Level">Filter Level</option>
+                                    <option value="Humidity Level">Humidity Level</option>
+                                </optgroup>
+                                <optgroup label="Security">
+                                    <option data-display="Security" value="Armed State">Armed State</option>
+                                </optgroup>
+                                    <optgroup label="People">
+                                    <option data-display="People" value="People Do Something">People Do Something</option>
+                                </optgroup>
+                                <optgroup label="Watcher Events">
+                                   <option data-display="Events" value="Events">Events</option>
+                                </optgroup>
+                            </select>
+
+                            {% else %} 
+                                {{ field.field }}
+                            {% endif %}
+
+
                         {% endif %}
                     {% endif %}
                     {% if field.field.help_text %}
                         <div class="help">{{ field.field.help_text|safe }}</div>
                     {% endif %}
                 </div>
+
             {% endfor %}
         </div>
     {% endfor %}
 </fieldset>
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+  
+    //hides dropdown content
+    $(".div_content").hide();
+  
+    //listen to dropdown for change
+    $("#id_trigger").change(function(){
+  
+    //rehide content on change
+    $(".div_content").hide();
+
+    //unhides current item
+    switch($(this).val()) {
+        case 'External Schedule Start':
+            $('.div_content[data-display="Schedule"]').show()
+            break;
+        case 'Time Window':
+            $('.div_content[data-display="Window"]').show()
+            break;
+        case 'Motion':
+            $('.div_content[data-display="Motion"]').show()
+            break;
+        case 'Sensor Opened':
+            $('.div_content[data-display="Sensor"]').show()
+            break;
+        case 'Sensor Closed':
+            $('.div_content[data-display="Sensor"]').show()
+            break;
+        case 'Lock is Unlocked':
+            $('.div_content[data-display="Lock"]').show()
+            break;
+        case 'Lock is Locked':
+            $('.div_content[data-display="Lock"]').show()
+            break;
+        case 'Currenty Activity':
+            $('.div_content[data-display="HVAC"]').show()
+            $('.div_content[data-display="HVAC-profile"]').show()
+            break;
+        case 'Fan':
+            $('.div_content[data-display="HVAC"]').show()
+            $('.div_content[data-display="HVAC-"]').show()
+            break;
+        case 'Hits Temperature':
+            $('.div_content[data-display="HVAC"]').show()
+            $('.div_content[data-display="HVAC-value"]').show()
+            break;
+        case 'Hold Setting':
+            $('.div_content[data-display="HVAC"]').show()
+            $('.div_content[data-display="HVAC-profile"]').show()
+            $('.div_content[data-display="HVAC-hold"]').show()
+            break;
+        case 'Heat Mode':
+            $('.div_content[data-display="HVAC"]').show()
+            $('.div_content[data-display="HVAC-heatmode"]').show()
+            break;
+        case 'Humidity Level':
+            $('.div_content[data-display="HVAC"]').show()
+            $('.div_content[data-display="HVAC-value"]').show()
+            break;
+        case 'Filter Level':
+            $('.div_content[data-display="HVAC"]').show()
+            $('.div_content[data-display="HVAC-value"]').show()
+            break;
+        case 'Armed State':
+            $('.div_content[data-display="Security"]').show()
+            break;
+        case 'People Do Something':
+            $('.div_content[data-display="People"]').show()
+            break;
+        case 'Events':
+            $('.div_content[data-display="Events"]').show()
+            break;
+        default:
+            $('.div_content').show()
+    }
+
+
+  });
+  
+});
+
+</script>
+<!--
+    $('#'+$(this).data( "display" )).show();
+-->
+

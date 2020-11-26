@@ -11,42 +11,42 @@ def turn_on_light(light):
     api_url = 'http://' + light.bridge.ip + '/api/' + light.bridge.username + '/lights/' + str(light.id) + '/state'
     payload = {'on':True,  'transitiontime':100}
     if put_command(api_url, payload):
-        logger.info(light.name)
+        logger.info("{light:"+light.name+"}{id:"+str(light.id)+"}")
 
 
 def turn_off_light(light):
     api_url = 'http://' + light.bridge.ip + '/api/' + light.bridge.username + '/lights/' + str(light.id) + '/state'
     payload = {'on':False,  'transitiontime':100}
     if put_command(api_url, payload):
-        logger.info(light.name)
+        logger.info("{light:"+light.name+"}{id:"+str(light.id)+"}")
 
 
 def turn_off_group(group):
     api_url = 'http://' + group.bridge.ip + '/api/' + group.bridge.username + '/groups/' + str(group.id) + '/action'
     payload = {'on':False,  'transitiontime':100}
     if put_command(api_url, payload):
-        logger.info(group.name)
+        logger.info("{group:"+group.name+"}{id:"+str(group.id)+"}")
 
 
 def turn_on_group(group):
     api_url = 'http://' + group.bridge.ip + '/api/' + group.bridge.username + '/groups/' + str(group.id) + '/action'
     payload = {'on':True,  'transitiontime':100}
     if put_command(api_url, payload):
-        logger.info(group.name)
+        logger.info("{group:"+group.name+"}{id:"+str(group.id)+"}")
 
 
 def blink_group(group):
     api_url = 'http://' + group.bridge.ip + '/api/' + group.bridge.username + '/groups/' + str(group.id) + '/action'
     payload = {'on':True,  'alert':'select'}
     if put_command(api_url, payload):
-        logger.info(group.name)
+        logger.info("{group:"+group.name+"}{id:"+str(group.id)+"}")
 
 
 def play_scene(scene):
     api_url = 'http://' + scene.bridge.ip + '/api/' + scene.bridge.username + '/groups/' + str(scene.group.id) + '/action'
     payload = {'scene': scene.id}
     if put_command(api_url, payload):
-        logger.info(scene.name)
+        logger.info("{scene:"+scene.name+"}{id:"+str(scene.id)+"}")
 
 def create_scene(bridge, payload):
     api_url = 'http://' + bridge.ip + '/api/' + bridge.username + '/scenes/'

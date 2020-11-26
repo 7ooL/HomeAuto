@@ -1,4 +1,4 @@
-import time, logging
+import time, logging, sys
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from homeauto.models.watcher import Directory
@@ -27,18 +27,22 @@ class Watcher:
         self.DIRECTORY_TO_WATCH = dir
 
     def run(self):
-        event_handler = Handler()
-        self.observer.schedule(event_handler, (self.DIRECTORY_TO_WATCH), recursive=True)
-        self.observer.start()
-        try:
-            while True:
-                time.sleep(5)
-        except:
-            self.observer.stop()
-            logger.error('attempting to restart')
-            start()
-        self.observer.join()
 
+        event_handler = Handler()
+        observer = Observer()
+        observer.schedule(event_handler, self.DIRECTORY_TO_WATCH, recursive=True)
+        observer.start()
+#        observer.join()
+        try:
+            while observer.is_alive():
+                time.sleep(5)
+                logger.warning("watcher sleep")
+        except:
+            logger.error("Unexpected error:"+ str(sys.exc_info()[0]))
+        finally:
+            observer.stop()
+            logger.warning("watcher stopped???, try and start again")
+            start()
 
 class Handler(FileSystemEventHandler):
 

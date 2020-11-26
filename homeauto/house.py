@@ -131,6 +131,8 @@ def register_watcher_event(event):
             else:
                 logger.error(event.src_path + ' contains invalid content: ' + str(s))
         remove_file(event.src_path)
+    else:
+        logger.info('New event - %s.' % event)
 
 
 def remove_file(path):
@@ -213,7 +215,7 @@ def register_security_event(the_who, state):
         username = User.objects.get(first_name=(who[0]), last_name=(who[1])).username
         logger.info('Security{Vivint}{' + username + '} set house to {' + state+'}')
     except:
-        logger.info('Security{Vivint}{' + who + '} set house to {' + state+']')
+        logger.info('Security{Vivint}{' + the_who + '} set house to {' + state+']')
     finally:
         who = the_who.split()
 
