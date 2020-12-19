@@ -88,7 +88,7 @@ class Job(models.Model):
         (15,'Find House Schedules in Devices'),
     )
     command = models.IntegerField(choices=COMMAND_TYPES, default='')
-    interval = models.IntegerField(default=600,validators=[MinValueValidator(0),MaxValueValidator(3600)] )
+    interval = models.IntegerField(default=600,validators=[MinValueValidator(0),MaxValueValidator(3600)], verbose_name='Run Interval (seconds)' )
     enabled = models.BooleanField(default=False)
 
 #    def save(self, *args, **kwargs):

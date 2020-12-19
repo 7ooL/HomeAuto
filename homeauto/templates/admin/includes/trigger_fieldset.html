@@ -1,12 +1,12 @@
-<fieldset class="module aligned {{ fieldset.classes }}">
-    {% if fieldset.name %}<h2>{{ fieldset.name }}</h2>{% endif %}
-    {% if fieldset.description %}
+<fieldset class="module aligned {{ fieldset.classes }}"> {% if fieldset.name %}<h2>{{ fieldset.name }}</h2>{% endif %} {% if fieldset.description %}
         <div class="description">{{ fieldset.description|safe }}</div>
     {% endif %}
 
 
     {% for line in fieldset %}
         {% for field in line %}
+          
+
             {% if field.field.name == "name" or  field.field.name == "enabled" or field.field.name == "trigger" %}
                 <div class="form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
             {% elif field.field.name == "motion_detector" %}
@@ -61,9 +61,10 @@
                             {{ field.choices }}
 
                             {% if field.field.name == "trigger" %}
-
+                            <input type="hidden" id="initial_trigger" value="{{ field.field.value }}">
+                             
                             <select name="trigger" id="id_trigger">
-                                <option value="-----" selected="">-----</option>
+                                <option value="-----" selected="{{ field.field.value }}">-----</option>
                                 <optgroup label="Time">
                                     <option data-display="Schedule" value="External Schedule Start">External Schedule Start</option>
                                     <option data-display="Window" value="Time Window">Time Window</option>
@@ -118,82 +119,92 @@ $(document).ready(function(){
   
     //hides dropdown content
     $(".div_content").hide();
-  
+
+//    $('id_trigger').val($('#initial_trigger').val()).trigger('change');
+
     //listen to dropdown for change
-    $("#id_trigger").change(function(){
+    $("#id_trigger").change(
+        function(){
   
-    //rehide content on change
-    $(".div_content").hide();
 
-    //unhides current item
-    switch($(this).val()) {
-        case 'External Schedule Start':
-            $('.div_content[data-display="Schedule"]').show()
-            break;
-        case 'Time Window':
-            $('.div_content[data-display="Window"]').show()
-            break;
-        case 'Motion':
-            $('.div_content[data-display="Motion"]').show()
-            break;
-        case 'Sensor Opened':
-            $('.div_content[data-display="Sensor"]').show()
-            break;
-        case 'Sensor Closed':
-            $('.div_content[data-display="Sensor"]').show()
-            break;
-        case 'Lock is Unlocked':
-            $('.div_content[data-display="Lock"]').show()
-            break;
-        case 'Lock is Locked':
-            $('.div_content[data-display="Lock"]').show()
-            break;
-        case 'Currenty Activity':
-            $('.div_content[data-display="HVAC"]').show()
-            $('.div_content[data-display="HVAC-profile"]').show()
-            break;
-        case 'Fan':
-            $('.div_content[data-display="HVAC"]').show()
-            $('.div_content[data-display="HVAC-"]').show()
-            break;
-        case 'Hits Temperature':
-            $('.div_content[data-display="HVAC"]').show()
-            $('.div_content[data-display="HVAC-value"]').show()
-            break;
-        case 'Hold Setting':
-            $('.div_content[data-display="HVAC"]').show()
-            $('.div_content[data-display="HVAC-profile"]').show()
-            $('.div_content[data-display="HVAC-hold"]').show()
-            break;
-        case 'Heat Mode':
-            $('.div_content[data-display="HVAC"]').show()
-            $('.div_content[data-display="HVAC-heatmode"]').show()
-            break;
-        case 'Humidity Level':
-            $('.div_content[data-display="HVAC"]').show()
-            $('.div_content[data-display="HVAC-value"]').show()
-            break;
-        case 'Filter Level':
-            $('.div_content[data-display="HVAC"]').show()
-            $('.div_content[data-display="HVAC-value"]').show()
-            break;
-        case 'Armed State':
-            $('.div_content[data-display="Security"]').show()
-            break;
-        case 'People Do Something':
-            $('.div_content[data-display="People"]').show()
-            break;
-        case 'Events':
-            $('.div_content[data-display="Events"]').show()
-            break;
-        default:
-            $('.div_content').show()
-    }
+            console.log("change: "+$(this).val());
 
+            //rehide content on change
+            $(".div_content").hide();
 
-  });
+            //unhides current item
+            switch($(this).val()) {
+                case 'External Schedule Start':
+                    $('.div_content[data-display="Schedule"]').show()
+                    break;
+                case 'Time Window':
+                    $('.div_content[data-display="Window"]').show()
+                    break;
+                case 'Motion':
+                    $('.div_content[data-display="Motion"]').show()
+                    break;
+                case 'Sensor Opened':
+                    $('.div_content[data-display="Sensor"]').show()
+                    break;
+                case 'Sensor Closed':
+                    $('.div_content[data-display="Sensor"]').show()
+                    break;
+                case 'Lock is Unlocked':
+                    $('.div_content[data-display="Lock"]').show()
+                    break;
+                case 'Lock is Locked':
+                    $('.div_content[data-display="Lock"]').show()
+                    break;
+                case 'Currenty Activity':
+                    $('.div_content[data-display="HVAC"]').show()
+                    $('.div_content[data-display="HVAC-profile"]').show()
+                    break;
+                case 'Fan':
+                    $('.div_content[data-display="HVAC"]').show()
+                    $('.div_content[data-display="HVAC-"]').show()
+                    break;
+                case 'Hits Temperature':
+                    $('.div_content[data-display="HVAC"]').show()
+                    $('.div_content[data-display="HVAC-value"]').show()
+                    break;
+                case 'Hold Setting':
+                    $('.div_content[data-display="HVAC"]').show()
+                    $('.div_content[data-display="HVAC-profile"]').show()
+                    $('.div_content[data-display="HVAC-hold"]').show()
+                    break;
+                case 'Heat Mode':
+                    $('.div_content[data-display="HVAC"]').show()
+                    $('.div_content[data-display="HVAC-heatmode"]').show()
+                    break;
+                case 'Humidity Level':
+                    $('.div_content[data-display="HVAC"]').show()
+                    $('.div_content[data-display="HVAC-value"]').show()
+                    break;
+                case 'Filter Level':
+                    $('.div_content[data-display="HVAC"]').show()
+                    $('.div_content[data-display="HVAC-value"]').show()
+                    break;
+                case 'Armed State':
+                    $('.div_content[data-display="Security"]').show()
+                    break;
+                case 'People Do Something':
+                    $('.div_content[data-display="People"]').show()
+                    break;
+                case 'Events':
+                    $('.div_content[data-display="Events"]').show()
+                    break;
+                default:
+                    $('.div_content').show()
+            }
+        });
+
+        console.log("initial: "+$("#initial_trigger").val());
+//        $("id_trigger").change();
+//         $("id_trigger").val($("#initial_trigger").val()).change();
+
   
 });
+
 
 </script>
 <!--

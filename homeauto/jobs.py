@@ -142,7 +142,7 @@ def dropbox_job():
     if cmdline:
         logger.debug('Dropbox is running')
     else:
-        logger.warning("Dropbox service isn't running")
+        logger.warning("Dropbox service isn't running, restarting.")
         os.system(command)
 
 

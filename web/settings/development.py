@@ -62,7 +62,7 @@ LOGGING = {
 #        },
         'homeauto.apps': {
             'handlers': ['file', 'console'],
-            'level': 'INFO',
+            'level': 'DEBUG',
         },
         'django.server': {
             'handlers': ['file', 'console'],
@@ -70,7 +70,7 @@ LOGGING = {
         },
         'homeauto.house': {
             'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
         'homeauto.models': {
             'handlers': ['file', 'console'],
@@ -86,7 +86,7 @@ LOGGING = {
         },
         'homeauto.wemo': {
             'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
         'homeauto.hue': {
             'handlers': ['file', 'console'],
@@ -98,7 +98,7 @@ LOGGING = {
         },
         'homeauto.watcher': {
             'handlers': ['file', 'console'],
-            'level': 'INFO',
+            'level': 'DEBUG',
         },
         'homeauto.api_infinitude.pyInfinitude': {
             'handlers': ['file', 'console'],

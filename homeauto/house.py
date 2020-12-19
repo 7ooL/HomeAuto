@@ -113,19 +113,25 @@ def register_watcher_event(event):
                 value = s[1]
                 logger.info('Found:{' + key + '}{' + value+"}")
                 if key == 'arrive':
-                    p = Person.objects.get(user__username=value)
-                    if p:
-                        p.is_home = True
-                        p.save()
-                    else:
-                        logger.error('No person was found with the username: ' + str(value))
+                    try:
+                        p = Person.objects.get(user__username=value)
+                        if p:
+                            p.is_home = True
+                            p.save()
+                        else:
+                            logger.error('No person was found with the username: ' + str(value))
+                    except:
+                        logger.error("Unexpected error:"+ str(traceback.format_exc()))
                 elif key == 'leave':
-                    p = Person.objects.get(user__username=value)
-                    if p:
-                        p.is_home = False
-                        p.save()
-                    else:
-                        logger.error('No person was found with the username: ' + str(value))
+                    try:
+                        p = Person.objects.get(user__username=value)
+                        if p:
+                            p.is_home = False
+                            p.save()
+                        else:
+                            logger.error('No person was found with the username: ' + str(value))
+                    except:
+                        logger.error("Unexpected error:"+ str(traceback.format_exc()))
                 else:
                     logger.error('No action defined for key: ' + str(key))
             else:

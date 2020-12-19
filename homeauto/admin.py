@@ -21,7 +21,16 @@ admin.site.site_url = 'http://ha:8080.com/'
 admin.site.index_title = 'House Administration'
 admin.site.index_template = 'admin/ha_index.html'
 
+class CustomAdminSite(admin.AdminSite):
 
+    def index(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        all_users= User.objects.all()
+        extra_context['all_users'] = {'all_users': all_users}
+        # Add your context here
+        return super(CustomAdminSite, self).index(request, extra_context)
+
+site = CustomAdminSite
 
 admin.site.register(hue.SceneLightstate)
 admin.site.register(house.CustomEvent)
@@ -68,7 +77,7 @@ class NuggetAdmin(admin.ModelAdmin):
 
     search_fields = ( 'name','triggers__name', 'actions__name')
     list_filter = ('enabled', 'only_execute_if_someone_is_home')
-    list_display = ('name', 'id', 'enabled', 'only_execute_if_someone_is_home', 'trigger_name', 'action_name')
+    list_display = ('name', 'enabled', 'only_execute_if_someone_is_home', 'trigger_name', 'action_name', 'id')
 
 admin.site.register(house.Nugget, NuggetAdmin)
 
@@ -97,12 +106,14 @@ class HouseScheduleAdmin(admin.ModelAdmin):
 admin.site.register(house.HouseSchedule, HouseScheduleAdmin)
 
 class TriggerAdmin(admin.ModelAdmin):
+    search_fields = ['name']
     list_display = ('name', 'enabled', 'trigger', 'id')
     list_filter = ('enabled', 'trigger')
     change_form_template = 'trigger_edit.html'
 admin.site.register(house.Trigger, TriggerAdmin)
 
 class ActionAdmin(admin.ModelAdmin):
+    search_fields = ['name']
     list_display = ('name', 'enabled', 'action', 'last_action_time')
     list_filter = ('enabled', 'action')
 admin.site.register(house.Action, ActionAdmin)
@@ -176,11 +187,11 @@ class PersonInline(admin.StackedInline):
     can_delete = False
     verbose_name_plural = 'Home Auto Options'
 
-
 class UserAdmin(BaseUserAdmin):
     list_display = ('username', 'first_name', 'last_name', 'is_home')
     def is_home(self, obj):
         return house.Person.objects.get(user=obj.id).is_home
     inlines = (PersonInline,)
+
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
