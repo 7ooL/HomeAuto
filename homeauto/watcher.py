@@ -8,7 +8,9 @@ from homeauto.house import register_watcher_event
 
 logger = logging.getLogger(__name__)
 
-def clean(): directories = Directory.objects.all() if directories:
+def clean():
+     directories = Directory.objects.all()
+     if directories:
         for directory in directories:
             if directory.enabled:
                 # cleanup directory before starting

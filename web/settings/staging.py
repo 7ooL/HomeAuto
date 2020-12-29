@@ -167,7 +167,7 @@ DATABASES = {
     'default': {
         'NAME': 'homeauto',
         'ENGINE': 'django.db.backends.mysql',
-        'CONN_MAX_AGE': 3600,
+        'CONN_MAX_AGE': 0,
         'USER': secret.DB_USER,
         'PASSWORD': secret.DB_PASSWORD,
         'OPTIONS': {
