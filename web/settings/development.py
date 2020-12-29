@@ -127,7 +127,6 @@ ADMIN_REORDER = (
 
     {'app': 'auth', 'models': (
        {'model': 'auth.User', 'label': 'Residents and Guest'},
-       'auth.Group',
     )},
 
     {'app': 'django_apscheduler', 'label': 'Scheduling', 'models': (

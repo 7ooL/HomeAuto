@@ -1,4 +1,4 @@
-import logging, requests, json, smtplib, datetime, os, random, sys, subprocess
+import logging, requests, json, smtplib, datetime, os, random, sys, subprocess, traceback
 from django.utils import timezone
 from django.contrib.auth.models import User
 from homeauto.models.hue import Sensor, Scene, Light, Group, Schedule
@@ -86,6 +86,7 @@ def register_watcher_event(event):
                 try:
                     e = CustomEvent.objects.get(name=(s[0].lower()))
                 except:
+                    logger.error("Error:"+ str(traceback.format_exc()))
                     logger.error('There are no watcher events defined for: ' + s[0])
                     remove_file(event.src_path)
                     return
@@ -125,9 +126,14 @@ def register_watcher_event(event):
                 elif key == 'leave':
                     try:
                         p = Person.objects.get(user__username=value)
+                        logger.warning(p.user.first_name+" was found")
                         if p:
                             p.is_home = False
-                            p.save()
+                            try:
+                                p.save()
+                                logger.warning(value+" was saved")
+                            except:
+                                logger.error("Unexpected error:"+ str(traceback.format_exc()))
                         else:
                             logger.error('No person was found with the username: ' + str(value))
                     except:
@@ -139,6 +145,7 @@ def register_watcher_event(event):
         remove_file(event.src_path)
     else:
         logger.info('New event - %s.' % event)
+    logger.warning("end of register watcher event - %s" % event)
 
 
 def remove_file(path):

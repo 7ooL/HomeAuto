@@ -1,16 +1,14 @@
 import time, logging, sys, os
 from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
+from watchdog.events import  (
+    PatternMatchingEventHandler, FileModifiedEvent,
+    FileCreatedEvent)
 from homeauto.models.watcher import Directory
 from homeauto.house import register_watcher_event
 
 logger = logging.getLogger(__name__)
 
-
-
-def clean():
-    directories = Directory.objects.all()
-    if directories:
+def clean(): directories = Directory.objects.all() if directories:
         for directory in directories:
             if directory.enabled:
                 # cleanup directory before starting
@@ -25,7 +23,7 @@ def clean():
 
 def start():
 
-    logger.warning("begining of watcher start")
+    logger.info("Starting Watchers")
     directories = Directory.objects.all()
     if directories:
         for directory in directories:
@@ -46,28 +44,23 @@ class Watcher:
 
     def run(self):
 
-        event_handler = Handler()
         observer = Observer()
-        observer.schedule(event_handler, self.DIRECTORY_TO_WATCH, recursive=True)
-        observer.start()
 
-        while observer.is_alive():
-            time.sleep(5)
-
+        observer.schedule(event_handler=Handler('*'), path=self.DIRECTORY_TO_WATCH)
+        observer.daemon = False
         try:
-            observer.stop()
-        except:
-            logger.error("Unexpected error (stop):"+ str(sys.exc_info()[0]))
-        try:
-            observer.join()
-        except:
-            logger.error("Unexpected error (join):"+ str(sys.exc_info()[0]))
+            observer.start() 
+        except KeyboardInterrupt:
+            logger.error('Watcher Stopped.')
+        observer.join(2)
 
-        logger.warning("watcher dead, try and start again")
-#        start()
-
-class Handler(FileSystemEventHandler):
+class Handler(PatternMatchingEventHandler):
 
     @staticmethod
     def on_any_event(event):
-        register_watcher_event(event)
+        logger.debug('New event - %s.' % event)
+        if event.event_type == 'created':
+            register_watcher_event(event)
+
+
+

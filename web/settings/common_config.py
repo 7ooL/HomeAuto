@@ -6,22 +6,16 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Application definition
 INSTALLED_APPS = [
-#    'homeauto.apps.AppAdminConfig',
     'admin_reorder',
     'homeauto.apps.Config',
-#    'homeauto.api_decora.decora_wifi',
-    'django.contrib.admin',
+    'homeauto.apps.MyAdminConfig',
+    'django_apscheduler',
+#    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_apscheduler',
-#    'homeauto.apps.AppAdmin',
-#    'home_auto.models.Service',
-#    'home_auto.models.Person',
-#    'homeauto.models.Wemo',
-#    'home_auto.models.Device',
 ]
 
 

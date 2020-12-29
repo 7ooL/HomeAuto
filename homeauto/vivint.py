@@ -3,12 +3,14 @@ from homeauto.models.house import Account
 from homeauto.models.vivint import Panel, Device
 import asyncio, logging, warnings, time
 import homeauto.jobs as jobs
+import multiprocessing
 
 logger = logging.getLogger(__name__)
 
 ACCT_NAME = 'Vivint'
 
 def start():
+    logger.info("Starting Vivint Connection")
     warnings.filterwarnings('ignore')
     if Account.objects.filter(name=ACCT_NAME).exists():
         logger.debug('Account name ' + ACCT_NAME + ' exists')
@@ -20,21 +22,26 @@ def start():
             asyncio.run(session.connect_panel())
             asyncio.run(session.connect_pubnub())
             logger.debug("Session Expires: "+str(session.get_session()['expires']))
-            keep_alive(session)
+            process = multiprocessing.Process(target=keep_alive, args=(session,), name="Vivint")
+            process.start()
         else:
             logger.warning('Cannot connect to Vivint because the account is disabled')
     else:
         logger.error('Cannot connect to Vivint because no Account information for ' + ACCT_NAME + ' exist')
 
 def keep_alive(session):
-    alive = True
-    while alive:
-        if session.session_valid():
-            time.sleep(5)
-        else:
-            alive = False
-    session.disconnect()
-    start()
+    try:
+        alive = True
+        while alive:
+            if session.session_valid():
+                time.sleep(5)
+            else:
+                alive = False
+        session.disconnect()
+        start()
+    except KeyboardInterrupt:
+        logger.error('Vivint Stopped.')
+
 
 def sync_vivint_sensors():
     warnings.filterwarnings('ignore')
