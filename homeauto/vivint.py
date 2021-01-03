@@ -43,6 +43,7 @@ def keep_alive(session):
         logger.error('Vivint Stopped.')
 
 
+# this is a manual update of devices and not what is received from the pubnub feed
 def sync_vivint_sensors():
     warnings.filterwarnings('ignore')
     if Account.objects.filter(name=ACCT_NAME).exists():
