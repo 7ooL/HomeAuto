@@ -45,9 +45,7 @@ class Watcher:
         self.DIRECTORY_TO_WATCH = dir
 
     def run(self):
-
         observer = Observer()
-
         observer.schedule(event_handler=Handler('*'), path=self.DIRECTORY_TO_WATCH)
         observer.daemon = False
         try:

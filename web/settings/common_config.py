@@ -1,4 +1,21 @@
 import os
+import web.settings.secret as secret
+
+# Database
+# https://docs.djangoproject.com/en/2.2/ref/settings/#databases
+DATABASES = {
+    'default': {
+        'NAME': 'homeauto',
+        'ENGINE': 'django.db.backends.mysql',
+        'USER': secret.DB_USER,
+        'PASSWORD': secret.DB_PASSWORD,
+        'CONN_MAX_AGE': 0,
+        'OPTIONS': {
+          'autocommit': True,
+        },
+    }
+}
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -99,4 +116,5 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 

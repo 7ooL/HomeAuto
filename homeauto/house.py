@@ -145,7 +145,7 @@ def register_watcher_event(event):
         remove_file(event.src_path)
     else:
         logger.info('New event - %s.' % event)
-    logger.warning("end of register watcher event - %s" % event)
+    logger.debug("end of register watcher event - %s" % event)
 
 
 def remove_file(path):

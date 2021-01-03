@@ -10,7 +10,7 @@ def turn_on_light(device):
             cmd = '/usr/local/bin/wemo switch "' + device.name + '" on'
             proc = subprocess.Popen([cmd], stdout=(subprocess.PIPE), shell=True)
             out, err = proc.communicate()
-            logger.info(cmd)
+            logger.info(cmd+"-"+str(device.id))
             return True
         else:
             logger.debug('device ' + device.name + '(' + str(device.id) + ') is already on')
@@ -25,7 +25,7 @@ def turn_off_light(device):
             cmd = '/usr/local/bin/wemo switch "' + device.name + '" off'
             proc = subprocess.Popen([cmd], stdout=(subprocess.PIPE), shell=True)
             out, err = proc.communicate()
-            logger.info(cmd)
+            logger.info(cmd+"-"+str(device.id))
             return True
         else:
             logger.debug('device ' + device.name + '(' + str(device.id) + ') is already off')

@@ -6,6 +6,7 @@ from homeauto.api_decora.decora_wifi import DecoraWiFiSession
 from homeauto.api_decora.decora_wifi.models.person import Person
 from homeauto.api_decora.decora_wifi.models.residential_account import ResidentialAccount
 from homeauto.api_decora.decora_wifi.models.residence import Residence
+import traceback
 
 logger = logging.getLogger(__name__)
 
@@ -65,12 +66,12 @@ def decora(switch_name, command, brightness):
                                 attribs['power'] = 'ON'
                             else:
                                 attribs['power'] = 'OFF'
-                                logger.info(switch.name + ':' + str(attribs))
                             switch.update_attributes(attribs)
+                            logger.info(switch.name + ':' + str(attribs)+"-"+str(switch.id) )
                 Person.logout(session)
                 return True
             except:
-                logger.error("Unexpected error:"+ str(sys.exc_info()[0]))
+                logger.error("Error:"+ str(traceback.format_exc()))
         else:
             logger.warning('Cannot connect to ' + ACCT_NAME + ' because the account is disabled')
     else:
@@ -88,7 +89,7 @@ def sync_decora():
             try:
                 session.login(getattr(decoraAcct, 'username'), getattr(decoraAcct, 'password'))
             except:
-                logger.error("Unexpected error:"+ str(sys.exc_info()[0]))
+                logger.error("Error:"+ str(traceback.format_exc()))
             else:
                 perms = session.user.get_residential_permissions()
                 logger.debug('{} premissions'.format(len(perms)))

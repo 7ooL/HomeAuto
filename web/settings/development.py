@@ -24,7 +24,7 @@ USE_L10N = config.USE_L10N
 USE_TZ = config.USE_TZ
 STATIC_URL = config.STATIC_URL
 STATIC_ROOT = config.STATIC_ROOT
-
+DATABASES = config.DATABASES
 
 # logging settings used for development 
 LOGGING = {
@@ -98,7 +98,7 @@ LOGGING = {
         },
         'homeauto.watcher': {
             'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
         'homeauto.api_infinitude.pyInfinitude': {
             'handlers': ['file', 'console'],
@@ -171,17 +171,3 @@ ADMIN_REORDER = (
        {'model': 'homeauto.Panel', 'label': 'Vivint Panels'},
     )},
 )
-
-# Database
-# https://docs.djangoproject.com/en/2.2/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'NAME': 'homeauto',
-        'ENGINE': 'django.db.backends.mysql',
-        'USER': secret.DB_USER,
-        'PASSWORD': secret.DB_PASSWORD,
-        'OPTIONS': {
-          'autocommit': True,
-        },
-    }
-}
