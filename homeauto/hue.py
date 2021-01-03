@@ -266,9 +266,6 @@ def sync_sensors():
                             data['tempreature'] = sensors[sensor]['state']['tempreature']
                         if 'presence' in sensors[sensor]['state']:
                             data['presence'] = sensors[sensor]['state']['presence']
-                            if data['presence']:
-                                logger.debug(data['name'] + ' detected motion')
-                                register_motion_event('Hue', sensor)
                         if 'on' in sensors[sensor]['config']:
                             data['on'] = sensors[sensor]['config']['on']
                         if 'battery' in sensors[sensor]['config']:
@@ -293,6 +290,10 @@ def sync_sensors():
                             s = (Sensor.objects.create)(**data)
                             s.save()
                         else:
+                            if 'presence' in sensors[sensor]['state']:
+                                if Sensor.objects.get(id=sensor).presence != data['presence']:
+                                    logger.debug(data['name'] + ' detected motion')
+                                    register_motion_event('Hue', sensor)
                             logger.debug('Updating sensor:' + sensor)
                             (Sensor.objects.filter(id=sensor).update)(**data)
                     else:

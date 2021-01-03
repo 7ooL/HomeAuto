@@ -24,6 +24,7 @@ from django_apscheduler.models import DjangoJob
 
 class DjangoJobAdmin(admin.ModelAdmin):
     list_display = ('name', 'next_run_time')
+    search_fields = ['name']
 class DjangoJobExecutionAdmin(admin.ModelAdmin):
     list_display = ('job', 'status', 'run_time', 'duration')
     list_filter = ('status', )
