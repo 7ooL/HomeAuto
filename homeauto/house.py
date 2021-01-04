@@ -71,7 +71,7 @@ def register_person_event(sender, instance, **kwargs):
 
 
 def register_watcher_event(event):
-#    logger.warning(event)
+    logger.debug(event)
     if event.event_type == 'created':
         logger.info('Received created event - %s.' % event.src_path)
         with open(event.src_path) as f:
@@ -131,7 +131,6 @@ def register_watcher_event(event):
                             p.is_home = False
                             try:
                                 p.save()
-                                logger.warning(value+" was saved")
                             except:
                                 logger.error("Unexpected error:"+ str(traceback.format_exc()))
                         else:

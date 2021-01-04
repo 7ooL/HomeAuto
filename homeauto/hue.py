@@ -1,6 +1,6 @@
+import requests, json, pytz, time, sys, traceback
 from django.conf import settings
 from homeauto.models.hue import Group, Light, Scene, Bridge, SceneLightstate, Sensor, Schedule
-import requests, json, pytz, time, sys
 from datetime import datetime
 import subprocess, logging
 from homeauto.house import register_motion_event
@@ -423,7 +423,7 @@ def put_command(api_url, payload):
     except:
         logger.error('except ' + str(api_url))
         logger.error('except ' + str(payload))
-        logger.error("Unexpected error:"+ str(sys.exc_info()[0]))
+        logger.error("Error:"+ str(traceback.format_exc()))
         return False
     return True
 
@@ -437,7 +437,7 @@ def post_command(api_url, payload):
     except:
         logger.error('except ' + str(api_url))
         logger.error('except ' + str(payload))
-        logger.error("Unexpected error:"+ str(sys.exc_info()[0]))
+        logger.error("Error:"+ str(traceback.format_exc()))
 
         return None
     else:
@@ -452,14 +452,14 @@ def delete_command(api_url):
             logger.info(r.text)
     except:
         logger.error(str(api_url))
-        logger.error("Unexpected error:"+ str(sys.exc_info()[0]))
+        logger.error("Error:"+ str(traceback.format_exc()))
 
 def get_command(api_url):
     try:
         r = requests.get(api_url)
     except:
         logger.error(str(api_url))
-        logger.error("Unexpected error:"+ str(sys.exc_info()[0]))
+        logger.error("Error:"+ str(traceback.format_exc()))
     else:
         return r
     return None

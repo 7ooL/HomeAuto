@@ -90,7 +90,7 @@ LOGGING = {
         },
         'homeauto.hue': {
             'handlers': ['file', 'console'],
-            'level': 'INFO',
+            'level': 'DEBUG',
         },
         'homeauto.decora': {
             'handlers': ['file', 'console'],
