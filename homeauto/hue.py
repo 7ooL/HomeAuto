@@ -140,7 +140,7 @@ def sync_groups():
             groups = r.json()
             for group in groups:
                 data = {}
-                data['bridge'] = bridge.id
+                data['bridge'] = bridge
                 for light in groups[group]['lights']:
                     if not Light.objects.filter(id=light).exists():
                         logger.info('Creating Light:' + light)
@@ -149,40 +149,42 @@ def sync_groups():
 
                 if 'on' in groups[group]['action']:
                     data['on'] = groups[group]['action']['on']
+                if 'hue' in groups[group]['action']:
+                    data['hue'] = groups[group]['action']['hue']
+                if 'effect' in groups[group]['action']:
+                    data['effect'] = groups[group]['action']['effect']
+                if 'bri' in groups[group]['action']:
+                    data['bri'] = groups[group]['action']['bri']
+                if 'sat' in groups[group]['action']:
+                    data['sat'] = groups[group]['action']['sat']
+                if 'ct' in groups[group]['action']:
+                    data['ct'] = groups[group]['action']['ct']
+                if 'xy' in groups[group]['action']:
+                    data['xy'] = groups[group]['action']['xy']
+                if 'alert' in groups[group]['action']:
+                    data['alert'] = groups[group]['action']['alert']
+                if 'colormode' in groups[group]['action']:
+                    data['colormode'] = groups[group]['action']['colormode']
+                if 'type' in groups[group]:
+                    data['type'] = groups[group]['type']
+                if 'name' in groups[group]:
+                    data['name'] = groups[group]['name']
+                # if the group doesn't exist, then create it
+                if not Group.objects.filter(id=group).exists():
+                    logger.info('Creating group: ' + data['name']+"("+group+")")
+                    data['id'] = group
+                    g = (Group.objects.create)(**data)
+                    g.save()
+                # otherwise update the group
                 else:
-                    if 'hue' in groups[group]['action']:
-                        data['hue'] = groups[group]['action']['hue']
-                    if 'effect' in groups[group]['action']:
-                        data['effect'] = groups[group]['action']['effect']
-                    if 'bri' in groups[group]['action']:
-                        data['bri'] = groups[group]['action']['bri']
-                    if 'sat' in groups[group]['action']:
-                        data['sat'] = groups[group]['action']['sat']
-                    if 'ct' in groups[group]['action']:
-                        data['ct'] = groups[group]['action']['ct']
-                    if 'xy' in groups[group]['action']:
-                        data['xy'] = groups[group]['action']['xy']
-                    if 'alert' in groups[group]['action']:
-                        data['alert'] = groups[group]['action']['alert']
-                    if 'colormode' in groups[group]['action']:
-                        data['colormode'] = groups[group]['action']['colormode']
-                    if 'type' in groups[group]:
-                        data['type'] = groups[group]['type']
-                    if 'name' in groups[group]:
-                        data['name'] = groups[group]['name']
-                    if not Group.objects.filter(id=group).exists():
-                        logger.info('Creating group:' + group)
-                        data['id'] = group
-                        g = (Group.objects.create)(**data)
-                        g.save()
-                    else:
-                        logger.debug('Updating group:' + group)
-                        (Group.objects.filter(id=group).update)(**data)
-                    g = Group.objects.get(id=group)
-                    for light in groups[group]['lights']:
-                        l = Light.objects.get(id=light)
-                        logger.debug('Adding light ' + str(l) + ' to group: ' + str(g))
-                        g.lights.add(l)
+                    logger.debug('Updating group:' + data['name']+"("+group+")")
+                    (Group.objects.filter(id=group).update)(**data)
+                # add each light to the group
+                g = Group.objects.get(id=group)
+                for light in groups[group]['lights']:
+                    l = Light.objects.get(id=light)
+                    logger.debug('Adding light ' + str(l) + ' to group: ' + str(g))
+                    g.lights.add(l)
 
 
 def sync_lights():
