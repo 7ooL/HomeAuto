@@ -58,7 +58,7 @@ class Switch(Common):
     lat = models.CharField(max_length=30, blank=True, null=True)
     includeInRoomOnOff = models.BooleanField(default=False)
     model = models.CharField(max_length=30, blank=True, null=True)
-    power = models.BooleanField(default=False)
+    power = models.BooleanField(default=False, verbose_name='On')
     random = models.BooleanField(default=False)
     lastUpdated = models.CharField(max_length=30, blank=True, null=True)
     dimLED = models.IntegerField(default=0)

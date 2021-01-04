@@ -23,7 +23,7 @@ class Common(models.Model):
 
 class Wemo(Common):
     type = models.CharField(max_length=30)
-    status = models.BooleanField(default=False)
+    status = models.BooleanField(default=False, verbose_name='On')
 
 
 

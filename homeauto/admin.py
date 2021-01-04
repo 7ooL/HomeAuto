@@ -24,10 +24,11 @@ from django_apscheduler.models import DjangoJob
 
 class DjangoJobAdmin(admin.ModelAdmin):
     list_display = ('name', 'next_run_time')
-    search_fields = ['name']
+    search_fields = ('name',)
 class DjangoJobExecutionAdmin(admin.ModelAdmin):
     list_display = ('job', 'status', 'run_time', 'duration')
     list_filter = ('status', )
+
 admin.site.register(DjangoJob, DjangoJobAdmin)
 admin.site.register(DjangoJobExecution, DjangoJobExecutionAdmin)
 
@@ -36,24 +37,32 @@ import homeauto.models.house as house
 
 class JobAdmin(admin.ModelAdmin):
     list_display = ('command', 'id', 'interval', 'enabled')
+    list_filter = ('enabled',)
 class AccountAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'username', 'enabled')
+    list_filter = ('enabled',)
 class HouseMotionDetectorAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'enabled', 'source', 'source_id')
+    list_filter = ('enabled','source')
+    search_fields = ('name','source')
 class HouseLightAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'enabled', 'source', 'source_type', 'source_id')
     list_filter = ('source', 'source_type')
+    search_fields = ('name','source', 'source_type')
 class HouseLockAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'enabled', 'source', 'source_type', 'source_id')
     list_filter = ('source', 'source_type')
+    search_fields = ('name','source', 'source_type')
 class HouseSensorAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'enabled', 'source', 'source_type', 'source_id')
     list_filter = ('source', 'source_type')
+    search_fields = ('name','source', 'source_type')
 class HouseScheduleAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'enabled', 'source', 'source_type', 'source_id')
     list_filter = ('source', 'source_type')
+    search_fields = ('name','source', 'source_type')
 class TriggerAdmin(admin.ModelAdmin):
-    search_fields = ['name']
+    search_fields = ('name','trigger')
     list_display = ('name', 'enabled', 'trigger', 'id')
     list_filter = ('enabled', 'trigger')
     change_form_template = 'trigger_edit.html'
@@ -149,6 +158,7 @@ import homeauto.models.watcher as watcher
 
 class WatcherAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'enabled', 'directory')
+    search_fields = ('name',)
 
 admin.site.register(watcher.Directory, WatcherAdmin)
 
@@ -157,6 +167,8 @@ import homeauto.models.wemo as wemo
 
 class WemoAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'type', 'status', 'enabled')
+    list_filter = ('type','status','enabled')
+    search_fields = ('name',)
 
 admin.site.register(wemo.Wemo, WemoAdmin)
 
@@ -165,6 +177,8 @@ import homeauto.models.decora as decora
 
 class DecoraSwitchAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'model', 'power', 'enabled')
+    list_filter = ('model','power','enabled')
+    search_fields = ('name',)
 
 admin.site.register(decora.Switch, DecoraSwitchAdmin)
 
@@ -176,6 +190,7 @@ class VivintPanelAdmin(admin.ModelAdmin):
 class VivintDeviceAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'state', 'type', 'enabled')
     list_filter = ('state', 'type', 'enabled')
+    search_fields = ('name','state','type')
 
 admin.site.register(vivint.Panel, VivintPanelAdmin)
 admin.site.register(vivint.Device, VivintDeviceAdmin)
@@ -185,17 +200,25 @@ import homeauto.models.hue as hue
 
 class HueGroupAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'type', 'on', 'enabled')
+    list_filter = ('type','on','enabled')
+    search_fields = ('name',)
 class HueLightAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'type', 'modelid', 'on', 'enabled')
     list_filter = ('type', 'modelid', 'on', 'enabled')
+    search_fields = ('name',)
 class HueSceneAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'group', 'enabled')
+    list_filter = ('group','enabled')
+    search_fields = ('name',)
 class HueBridgeAdmin(admin.ModelAdmin):
     list_display = ('ip', 'id', 'alarm_use', 'count_down_lights', 'enabled')
 class HueSensorAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'presence', 'productname', 'lastupdated', 'battery','enabled')
+    list_filter = ('presence','enabled', 'productname')
+    search_fields = ('name','productname')
 class HueScheduleAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'localtime', 'enabled')
+    search_fields = ('name',)
 
 admin.site.register(hue.Schedule, HueScheduleAdmin)
 admin.site.register(hue.SceneLightstate)
