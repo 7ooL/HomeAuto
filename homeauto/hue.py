@@ -4,7 +4,7 @@ from homeauto.models.hue import Group, Light, Scene, Bridge, SceneLightstate, Se
 from datetime import datetime
 import subprocess, logging
 from homeauto.house import register_motion_event
-
+from homeauto.admin_logs import log_addition, log_change, log_deletion
 logger = logging.getLogger(__name__)
 
 def turn_on_light(light):
@@ -146,6 +146,8 @@ def sync_groups():
                         logger.info('Creating Light:' + light)
                         l = Light.objects.create(id=light)
                         l.save()
+                        log_addition(l)
+
 
                 if 'on' in groups[group]['action']:
                     data['on'] = groups[group]['action']['on']
@@ -175,6 +177,7 @@ def sync_groups():
                     data['id'] = group
                     g = (Group.objects.create)(**data)
                     g.save()
+                    log_addition(g)
                 # otherwise update the group
                 else:
                     logger.debug('Updating group:' + data['name']+"("+group+")")
@@ -229,6 +232,7 @@ def sync_lights():
                     data['id'] = light
                     g = (Light.objects.create)(**data)
                     g.save()
+                    log_addition(g)
                 else:
                     logger.debug('Updating light:' + light)
                     (Light.objects.filter(id=light).update)(**data)
@@ -291,6 +295,7 @@ def sync_sensors():
                             data['id'] = sensor
                             s = (Sensor.objects.create)(**data)
                             s.save()
+                            log_addition(s)
                         else:
                             if 'presence' in sensors[sensor]['state']:
                                 if Sensor.objects.get(id=sensor).presence != data['presence']:
@@ -350,31 +355,27 @@ def sync_scenes():
                                     lsid = ls + '.' + scene
                                     if 'on' in lightstates[ls]:
                                         data['on'] = lightstates[ls]['on']
+                                    if 'bri' in lightstates[ls]:
+                                        data['bri'] = lightstates[ls]['bri']
+                                    if 'sat' in lightstates[ls]:
+                                        data['sat'] = lightstates[ls]['sat']
+                                    if 'ct' in lightstates[ls]:
+                                        data['ct'] = lightstates[ls]['ct']
+                                    if 'xy' in lightstates[ls]:
+                                        data['xy'] = lightstates[ls]['xy']
+                                    if not SceneLightstate.objects.filter(id=lsid).exists():
+                                        logger.info('Creating lightstate:' + lsid)
+                                        data['id'] = lsid
+                                        hsls = (SceneLightstate.objects.create)(**data)
+                                        hsls.save()
+                                        log_addition(hsls)
                                     else:
-                                        if 'bri' in lightstates[ls]:
-                                            data['bri'] = lightstates[ls]['bri']
-                                        if 'sat' in lightstates[ls]:
-                                            data['sat'] = lightstates[ls]['sat']
-                                        if 'ct' in lightstates[ls]:
-                                            data['ct'] = lightstates[ls]['ct']
-                                        if 'xy' in lightstates[ls]:
-                                            data['xy'] = lightstates[ls]['xy']
-                                        if not SceneLightstate.objects.filter(id=lsid).exists():
-                                            logger.info('Creating lightstate:' + lsid)
-                                            data['id'] = lsid
-                                            hsls = (SceneLightstate.objects.create)(**data)
-                                            hsls.save()
-                                        else:
-                                            logger.debug('Updating lightstate:' + lsid)
-                                            (SceneLightstate.objects.filter(id=lsid).update)(**data)
-                                        hsls = SceneLightstate.objects.get(id=lsid)
-                                        s.lightstates.add(hsls)
-                            except ValueError as error:
-                                try:
-                                    logger.error(error)
-                                finally:
-                                    error = None
-                                    del error
+                                        logger.debug('Updating lightstate:' + lsid)
+                                        (SceneLightstate.objects.filter(id=lsid).update)(**data)
+                                    hsls = SceneLightstate.objects.get(id=lsid)
+                                    s.lightstates.add(hsls)
+                            except:
+                                logger.error("Error:"+ str(traceback.format_exc()))
                         else:
                             logger.warning('Light (' + scenes['light'] + ')in Scene (' + scene + ') does not exist')
 
@@ -408,6 +409,7 @@ def sync_schedules():
                     data['id'] = schedule
                     s = (Schedule.objects.create)(**data)
                     s.save()
+                    log_addition(s)
                 else:
                     logger.debug('Updating schedule:' + schedule)
                     (Schedule.objects.filter(id=schedule).update)(**data)
