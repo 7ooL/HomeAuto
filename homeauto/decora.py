@@ -6,6 +6,7 @@ from homeauto.api_decora.decora_wifi import DecoraWiFiSession
 from homeauto.api_decora.decora_wifi.models.person import Person
 from homeauto.api_decora.decora_wifi.models.residential_account import ResidentialAccount
 from homeauto.api_decora.decora_wifi.models.residence import Residence
+from homeauto.admin_logs import log_addition, log_change, log_deletion
 import traceback
 
 logger = logging.getLogger(__name__)
@@ -177,6 +178,7 @@ def sync_decora():
                             logger.info('Creating Decora Switch:' + data['name'])
                             s = (Switch.objects.create)(**data)
                             s.save()
+                            log_addition(s)
                         else:
                             logger.debug('Updating Decora Switch:' + data['name'])
                             (Switch.objects.filter(id=(data['id'])).update)(**data)

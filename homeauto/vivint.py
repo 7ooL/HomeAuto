@@ -1,6 +1,7 @@
 from homeauto.api_vivint.pyvivintsky.vivint_sky import VivintSky
 from homeauto.models.house import Account
 from homeauto.models.vivint import Panel, Device
+from homeauto.admin_logs import log_addition, log_change, log_deletion
 import asyncio, logging, warnings, time
 import homeauto.jobs as jobs
 import multiprocessing
@@ -85,6 +86,7 @@ def sync_vivint_sensors():
                         logger.info('Creating Device: ' + ddata['name'])
                         d = (Device.objects.create)(**ddata)
                         d.save()
+                        log_addition(d)
                     else:
                         logger.debug('Updating Device: ' + ddata['name'])
                         (Device.objects.filter(id=ID).update)(**ddata)

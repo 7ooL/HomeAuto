@@ -1,6 +1,7 @@
 from django.conf import settings
 from homeauto.models.wemo import Wemo
 import subprocess, logging
+from homeauto.admin_logs import log_addition, log_change, log_deletion
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +75,7 @@ def sync_wemo():
                     data['name'] = device[1]
                     w = (Wemo.objects.create)(**data)
                     w.save()
+                    log_addition(w)
                 else:
                     xWemo = Wemo.objects.get(name=(device[1]))
                     if xWemo.type != device[0]:

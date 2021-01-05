@@ -133,6 +133,7 @@ ADMIN_REORDER = (
        {'model': 'homeauto.HouseLock','label': 'House Locks'},
        {'model': 'homeauto.HouseSensor','label': 'House Sensors'},
        {'model': 'homeauto.HouseSchedule','label': 'House Schedules'},
+       {'model': 'admin.LogEntry','label': 'Administration Logs'},
     )},
 
     {'app': 'homeauto', 'label': 'House Configuations', 'models': (

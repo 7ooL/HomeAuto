@@ -103,7 +103,6 @@ class Group(Common):
     def __str__(self):
         return '{}'.format(self.name)
 
-
 class SceneLightstate(models.Model):
     id = models.CharField(primary_key=True, max_length=30)
     bri = models.IntegerField(default=0)
@@ -111,7 +110,6 @@ class SceneLightstate(models.Model):
     sat =  models.IntegerField(default=0)
     ct =  models.IntegerField(default=0)
     on = models.BooleanField(default=False)
-
 
 # Scenes
 class Scene(Common):

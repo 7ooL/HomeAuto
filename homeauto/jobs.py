@@ -12,6 +12,7 @@ from homeauto.models.hue import Sensor, Light, Group, Scene, Schedule
 from homeauto.models.wemo import Wemo
 from homeauto.models.decora import Switch
 from homeauto.models.vivint import Device
+from homeauto.admin_logs import log_addition, log_change, log_deletion
 import homeauto.hue as HueJobs
 import homeauto.vivint as VivintJobs
 import homeauto.wemo as WemoJobs
@@ -159,7 +160,7 @@ def find_schedules_job():
             x = (HouseSchedule.objects.create)(**data)
             x.save()
             logger.info('Found new schedule: ' + data['name'])
-
+            log_addition(x)
 
 def find_sensors_job():
     for s in Device.objects.filter(enabled=True, type='wireless_sensor', motion_detector=False):
@@ -174,6 +175,7 @@ def find_sensors_job():
             x = (HouseSensor.objects.create)(**data)
             x.save()
             logger.info('Found new sensor: ' + data['name'])
+            log_addition(x)
 
 
 def find_locks_job():
@@ -189,6 +191,7 @@ def find_locks_job():
             x = (HouseLock.objects.create)(**data)
             x.save()
             logger.info('Found new lock: ' + data['name'])
+            log_addition(x)
 
 
 def find_motion_detectors_job():
@@ -204,6 +207,7 @@ def find_motion_detectors_job():
             x = (HouseMotionDetector.objects.create)(**data)
             x.save()
             logger.info('Found new motion detector: ' + data['name'])
+            log_addition(x)
 
     for md in Sensor.objects.filter(enabled=True, motion_detector=True):
         try:
@@ -217,6 +221,7 @@ def find_motion_detectors_job():
             x = (HouseMotionDetector.objects.create)(**data)
             x.save()
             logger.info('Found new motion detector: ' + data['name'])
+            log_addition(x)
 
 
 def find_lights_job():
@@ -232,6 +237,7 @@ def find_lights_job():
             x = (HouseLight.objects.create)(**data)
             x.save()
             logger.info('Found new house light: ' + data['name'])
+            log_addition(x)
 
     for l in Group.objects.filter(enabled=True):
         try:
@@ -245,6 +251,7 @@ def find_lights_job():
             x = (HouseLight.objects.create)(**data)
             x.save()
             logger.info('Found new house light: ' + data['name'])
+            log_addition(x)
 
     for l in Switch.objects.filter(enabled=True):
         try:
@@ -258,6 +265,7 @@ def find_lights_job():
             x = (HouseLight.objects.create)(**data)
             x.save()
             logger.info('Found new house light: ' + data['name'])
+            log_addition(x)
 
     for l in Wemo.objects.filter(enabled=True):
         try:
@@ -271,3 +279,4 @@ def find_lights_job():
             x = (HouseLight.objects.create)(**data)
             x.save()
             logger.info('Found new house light: ' + data['name'])
+            log_addition(x)

@@ -18,6 +18,16 @@ admin.site.site_url = 'http://ha:8080.com/'
 admin.site.index_title = 'House Administration'
 admin.site.index_template = 'admin/ha_index.html'
 
+# log entry (activity log)
+from django.contrib.admin.models import LogEntry
+
+class adminLogEntry(admin.ModelAdmin):
+    list_display = ('object_repr', 'action_flag', 'user', 'content_type', 'object_id')
+    list_filter = ('action_flag', 'user')
+    search_fields = ('object_repr',)
+
+admin.site.register(LogEntry, adminLogEntry)
+
 # job models
 from django_apscheduler.models import DjangoJobExecution
 from django_apscheduler.models import DjangoJob
@@ -31,6 +41,15 @@ class DjangoJobExecutionAdmin(admin.ModelAdmin):
 
 admin.site.register(DjangoJob, DjangoJobAdmin)
 admin.site.register(DjangoJobExecution, DjangoJobExecutionAdmin)
+
+# global actions for objects
+def make_discoverable(modeladmin, request, queryset):
+    queryset.update(enabled=True)
+make_discoverable.short_description = "Make selected objects discoverable by HomeAuto"
+
+def remove_discoverable(modeladmin, request, queryset):
+    queryset.update(enabled=False)
+remove_discoverable.short_description = "Remove discoverability by HomeAuto"
 
 # house models
 import homeauto.models.house as house
@@ -159,6 +178,7 @@ import homeauto.models.watcher as watcher
 class WatcherAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'enabled', 'directory')
     search_fields = ('name',)
+    actions = [make_discoverable, remove_discoverable]
 
 admin.site.register(watcher.Directory, WatcherAdmin)
 
@@ -169,6 +189,7 @@ class WemoAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'type', 'status', 'enabled')
     list_filter = ('type','status','enabled')
     search_fields = ('name',)
+    actions = [make_discoverable, remove_discoverable]
 
 admin.site.register(wemo.Wemo, WemoAdmin)
 
@@ -179,6 +200,7 @@ class DecoraSwitchAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'model', 'power', 'enabled')
     list_filter = ('model','power','enabled')
     search_fields = ('name',)
+    actions = [make_discoverable, remove_discoverable]
 
 admin.site.register(decora.Switch, DecoraSwitchAdmin)
 
@@ -191,6 +213,7 @@ class VivintDeviceAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'state', 'type', 'enabled')
     list_filter = ('state', 'type', 'enabled')
     search_fields = ('name','state','type')
+    actions = [make_discoverable, remove_discoverable]
 
 admin.site.register(vivint.Panel, VivintPanelAdmin)
 admin.site.register(vivint.Device, VivintDeviceAdmin)
@@ -202,23 +225,29 @@ class HueGroupAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'type', 'on', 'enabled')
     list_filter = ('type','on','enabled')
     search_fields = ('name',)
+    actions = [make_discoverable, remove_discoverable]
 class HueLightAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'type', 'modelid', 'on', 'enabled')
     list_filter = ('type', 'modelid', 'on', 'enabled')
+    actions = [make_discoverable, remove_discoverable]
     search_fields = ('name',)
 class HueSceneAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'group', 'enabled')
     list_filter = ('group','enabled')
     search_fields = ('name',)
+    actions = [make_discoverable, remove_discoverable]
 class HueBridgeAdmin(admin.ModelAdmin):
     list_display = ('ip', 'id', 'alarm_use', 'count_down_lights', 'enabled')
+    actions = [make_discoverable, remove_discoverable]
 class HueSensorAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'presence', 'productname', 'lastupdated', 'battery','enabled')
     list_filter = ('presence','enabled', 'productname')
+    actions = [make_discoverable, remove_discoverable]
     search_fields = ('name','productname')
 class HueScheduleAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'localtime', 'enabled')
     search_fields = ('name',)
+    actions = [make_discoverable, remove_discoverable]
 
 admin.site.register(hue.Schedule, HueScheduleAdmin)
 admin.site.register(hue.SceneLightstate)

@@ -626,3 +626,4 @@ def send_text(phone, message):
     server.sendmail(sent_from, to, email_text)
     server.close()
     logger.info("Text:{"+message+"}")
+
