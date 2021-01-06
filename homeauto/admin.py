@@ -232,8 +232,8 @@ class HueLightAdmin(admin.ModelAdmin):
     actions = [make_discoverable, remove_discoverable]
     search_fields = ('name',)
 class HueSceneAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'group', 'enabled')
-    list_filter = ('group','enabled')
+    list_display = ('id', 'name', 'group', 'enabled', 'owner')
+    list_filter = ('group','enabled', 'owner')
     search_fields = ('name',)
     actions = [make_discoverable, remove_discoverable]
 class HueBridgeAdmin(admin.ModelAdmin):

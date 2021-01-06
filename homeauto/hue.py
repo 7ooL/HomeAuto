@@ -5,7 +5,87 @@ from datetime import datetime
 import subprocess, logging
 from homeauto.house import register_motion_event
 from homeauto.admin_logs import log_addition, log_change, log_deletion
+
 logger = logging.getLogger(__name__)
+
+from django.db.models.signals import pre_save, post_save, post_delete
+from django.dispatch import receiver
+
+# group callback to delete off hue hub
+@receiver(post_delete, sender=Group)
+def delete_group_on_hub(sender, instance, **kwargs):
+    delete_group(instance.bridge, instance.id)
+
+def delete_group(bridge, gid):
+    api_url = 'http://' + bridge.ip + '/api/' + bridge.username + '/groups/'+str(gid)
+    delete_command(api_url)
+
+# group calback to update on hue hub
+@receiver(post_save, sender=Group)
+def set_group_attributes_on_hub(sender, instance, **kwargs):
+    set_group_attributes(instance.bridge, instance)
+
+def set_group_attributes(bridge, group):
+    api_url = 'http://' + bridge.ip + '/api/' + bridge.username + '/groups/'+str(group.id)
+    payload = {'name':group.name,  'lights':convert_m2m_to_json_array(group.lights.all())}
+    if put_command(api_url, payload):
+        logger.info("{group:"+group.name+"}{id:"+str(group.id)+"}")
+
+# scene callback to delete off hue hub
+@receiver(post_delete, sender=Scene)
+def delete_scene_on_hub(sender, instance, **kwargs):
+    delete_scene(instance.bridge, instance.id)
+
+def delete_scene(bridge, sid):
+    api_url = 'http://' + bridge.ip + '/api/' + bridge.username + '/scenes/'+sid
+    delete_command(api_url)
+
+# scene callback to update on hue hub
+@receiver(post_save, sender=Scene)
+def set_scene_attributes_on_hub(sender, instance, **kwargs):
+    set_scene_attributes(instance.bridge, instance)
+
+def set_scene_attributes(bridge, scene):
+    api_url = 'http://' + bridge.ip + '/api/' + bridge.username + '/scenes/'+str(scene.id)
+    payload = {'name':scene.name,  'lights':convert_m2m_to_json_array(scene.lights.all())}
+    if put_command(api_url, payload):
+        logger.info("{scene:"+scene.name+"}{id:"+str(scene.id)+"}")
+
+# light callback to delete off hue hub
+@receiver(post_delete, sender=Light)
+def delete_light_on_hub(sender, instance, **kwargs):
+    delete_light(instance.bridge, instance.id)
+
+def delete_light(bridge, lid):
+    api_url = 'http://' + bridge.ip + '/api/' + bridge.username + '/lights/'+str(lid)
+    delete_command(api_url)
+
+# light callback to update on hue hub
+@receiver(post_save, sender=Light)
+def set_light_attributes_on_hub(sender, instance, **kwargs):
+    set_light_name(instance.bridge, instance)
+#    set_light_state(instance.bridge, instance)
+
+def set_light_name(bridge, light):
+    api_url = 'http://' + bridge.ip + '/api/' + bridge.username + '/lights/'+str(light.id)
+    payload = {'name':light.name}
+    if put_command(api_url, payload):
+        logger.info("{light:"+light.name+"}{id:"+str(light.id)+"}")
+
+def set_light_state(bridge, light):
+    api_url = 'http://' + bridge.ip + '/api/' + bridge.username + '/lights/'+str(light.id)+"/state"
+    data = {}
+    data['hue'] = light.hue
+#    data['effect'] = light.effect
+#    data['alert'] = light.alert
+#    data['bri'] = light.bri
+#    data['sat'] = light.sat
+#    data['ct'] = light.ct
+#    data['xy'] = light.xy
+    payload = json.dumps(data)
+    if put_command(api_url, payload):
+        logger.info("{light}:"+light.name+"}{id:"+str(light.id)+"}")
+
 
 def turn_on_light(light):
     api_url = 'http://' + light.bridge.ip + '/api/' + light.bridge.username + '/lights/' + str(light.id) + '/state'
@@ -56,10 +136,6 @@ def create_scene(bridge, payload):
         return id
     return None
 
-def delete_scene(bridge, sid):
-    api_url = 'http://' + bridge.ip + '/api/' + bridge.username + '/scenes/'+sid
-    delete_command(api_url)
-
 def flash_scene(scene):
     # get the group of the scene
     g = Scene.objects.get(id=scene.id).group
@@ -74,10 +150,11 @@ def flash_scene(scene):
     data['lights'] = light_list
     data['lightstates'] = lightstates
     temp_s_id = create_scene(g.bridge, data)
+    time.sleep(.2)
     if temp_s_id is not None:
         # play the flash scene
         play_scene(scene)
-        time.sleep(1)
+        time.sleep(2)
         # return lights to previous state
         api_url = 'http://' + g.bridge.ip + '/api/' + g.bridge.username + '/groups/' + str(g.id) + '/action'
         payload = {'scene': temp_s_id}
@@ -421,6 +498,7 @@ def put_command(api_url, payload):
         logger.debug(r.text)
         if 'error' in r.text:
             logger.error(r.text)
+            logger.error('payload tried: ' + str(payload))
             return False
     except:
         logger.error('except ' + str(api_url))
@@ -434,6 +512,7 @@ def post_command(api_url, payload):
         r = requests.post(api_url, data=(json.dumps(payload)))
         if 'error' in r.text:
             logger.error(r.text)
+            logger.error('payload tried: ' + str(payload))
         else:
             logger.info(r.text)
     except:
@@ -450,6 +529,7 @@ def delete_command(api_url):
         r = requests.delete(api_url)
         if 'error' in r.text:
             logger.error(r.text)
+            logger.error('payload tried: ' + str(payload))
         else:
             logger.info(r.text)
     except:
@@ -467,3 +547,9 @@ def get_command(api_url):
     return None
 
 
+def convert_m2m_to_json_array(objects):
+    first = True
+    s = []
+    for obj in objects:
+        s.append(str(obj.id))
+    return s
