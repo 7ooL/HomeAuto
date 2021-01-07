@@ -88,9 +88,11 @@ def sync_decora():
             logger.debug('Account ' + ACCT_NAME + ' is enabled')
             session = DecoraWiFiSession()
             try:
-                session.login(getattr(decoraAcct, 'username'), getattr(decoraAcct, 'password'))
+                res = session.login(getattr(decoraAcct, 'username'), getattr(decoraAcct, 'password'))
+            except ValueError as err:
+                    logger.error(err)
             except:
-                logger.error("Error:"+ str(traceback.format_exc()))
+                    logger.error("Error:"+ str(traceback.format_exc()))
             else:
                 perms = session.user.get_residential_permissions()
                 logger.debug('{} premissions'.format(len(perms)))

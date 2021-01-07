@@ -116,6 +116,7 @@ def register_watcher_event(event):
                 if key == 'arrive':
                     try:
                         p = Person.objects.get(user__username=value)
+                        logger.debug(p.user.first_name+" was found")
                         if p:
                             p.is_home = True
                             p.save()
@@ -126,7 +127,7 @@ def register_watcher_event(event):
                 elif key == 'leave':
                     try:
                         p = Person.objects.get(user__username=value)
-                        logger.warning(p.user.first_name+" was found")
+                        logger.debug(p.user.first_name+" was found")
                         if p:
                             p.is_home = False
                             try:

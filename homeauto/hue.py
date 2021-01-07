@@ -64,7 +64,7 @@ def delete_light(bridge, lid):
 @receiver(post_save, sender=Light)
 def set_light_attributes_on_hub(sender, instance, **kwargs):
     set_light_name(instance.bridge, instance)
-#    set_light_state(instance.bridge, instance)
+    set_light_state(instance.bridge, instance)
 
 def set_light_name(bridge, light):
     api_url = 'http://' + bridge.ip + '/api/' + bridge.username + '/lights/'+str(light.id)
@@ -75,16 +75,18 @@ def set_light_name(bridge, light):
 def set_light_state(bridge, light):
     api_url = 'http://' + bridge.ip + '/api/' + bridge.username + '/lights/'+str(light.id)+"/state"
     data = {}
-    data['hue'] = light.hue
-#    data['effect'] = light.effect
-#    data['alert'] = light.alert
-#    data['bri'] = light.bri
-#    data['sat'] = light.sat
-#    data['ct'] = light.ct
-#    data['xy'] = light.xy
-    payload = json.dumps(data)
-    if put_command(api_url, payload):
-        logger.info("{light}:"+light.name+"}{id:"+str(light.id)+"}")
+    data['on'] = light.on
+    data['alert'] = light.alert
+    if light.on:
+        data['hue'] = light.hue
+        data['effect'] = light.effect
+        data['bri'] = light.bri
+        data['sat'] = light.sat
+        data['ct'] = light.ct
+        data['xy'] = light.xy
+        payload = data
+        if put_command(api_url, payload):
+            logger.info("{light}:"+light.name+"}{id:"+str(light.id)+"}")
 
 
 def turn_on_light(light):
@@ -424,8 +426,11 @@ def sync_scenes():
                             logger.debug('Adding light: ' + str(l) + ' to scene: ' + str(s))
                             s.lights.add(l)
                             api_url = 'http://' + bridge.ip + '/api/' + bridge.username + '/scenes/' + scene
-                            r = requests.get(api_url)
                             try:
+                                r = get_command(api_url)
+                            except:
+                                logger.error("Error:"+ str(traceback.format_exc()))
+                            else:
                                 lightstates = r.json()['lightstates']
                                 for ls in lightstates:
                                     data = {}
@@ -451,8 +456,6 @@ def sync_scenes():
                                         (SceneLightstate.objects.filter(id=lsid).update)(**data)
                                     hsls = SceneLightstate.objects.get(id=lsid)
                                     s.lightstates.add(hsls)
-                            except:
-                                logger.error("Error:"+ str(traceback.format_exc()))
                         else:
                             logger.warning('Light (' + scenes['light'] + ')in Scene (' + scene + ') does not exist')
 
@@ -497,8 +500,12 @@ def put_command(api_url, payload):
         r = requests.put(api_url, data=(json.dumps(payload)))
         logger.debug(r.text)
         if 'error' in r.text:
-            logger.error(r.text)
             logger.error('payload tried: ' + str(payload))
+            for line in json.loads(r.text):
+                if 'error' in line:
+                    logger.error(line)
+                else:
+                    logger.debug(line)
             return False
     except:
         logger.error('except ' + str(api_url))
@@ -511,8 +518,12 @@ def post_command(api_url, payload):
     try:
         r = requests.post(api_url, data=(json.dumps(payload)))
         if 'error' in r.text:
-            logger.error(r.text)
             logger.error('payload tried: ' + str(payload))
+            for line in json.loads(r.text):
+                if 'error' in line:
+                    logger.error(line)
+                else:
+                    logger.debug(line)
         else:
             logger.info(r.text)
     except:
@@ -528,8 +539,12 @@ def delete_command(api_url):
     try:
         r = requests.delete(api_url)
         if 'error' in r.text:
-            logger.error(r.text)
             logger.error('payload tried: ' + str(payload))
+            for line in json.loads(r.text):
+                if 'error' in line:
+                    logger.error(line)
+                else:
+                    logger.debug(line)
         else:
             logger.info(r.text)
     except:
