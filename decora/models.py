@@ -22,6 +22,8 @@ class Common(models.Model):
 
 
 class Switch(Common):
+    class Meta:
+        verbose_name_plural = "Switches"
     mic_mute = models.CharField(max_length=30, blank=True, null=True)
     lang = models.CharField(max_length=30, blank=True, null=True)
     fadeOnTime = models.IntegerField(default=0)

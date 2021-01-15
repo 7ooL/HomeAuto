@@ -16,29 +16,29 @@ class Common(models.Model):
         ordering = ['name']
         abstract = True
 
-class Infinity(Common):
+class System(Common):
     ip = models.CharField(max_length=30)
     port = models.IntegerField(default=0)
     mode = models.CharField(max_length=30, blank=True, null=True)
 
 # home, sleep, wake, away, vac, manual
-class InfProfile(models.Model):
+class Profile(models.Model):
     name = models.CharField(max_length=10)
     clsp = models.DecimalField(max_digits=3, decimal_places=1)
     htsp = models.DecimalField(max_digits=3, decimal_places=1)
     fan = models.CharField(max_length=4)
-    infinity = models.ForeignKey(Infinity, on_delete=models.CASCADE, blank=True, null=True)
+    system = models.ForeignKey(System, on_delete=models.CASCADE, blank=True, null=True)
 
-class InfActivity(models.Model):
+class Activity(models.Model):
     DAYS = ((0,"Sunday"),(1,"Monday"),(2,"Tuesday"),(3,"Wednesday"),(4,"Thursday"),(5,"Friday"),(6,"Saturday"))
     time = models.TimeField(default=timezone.now)
     activity = models.CharField(max_length=6)
     day = models.IntegerField(choices=DAYS, default=0)
     period = models.IntegerField(default=0)
     enabled = models.BooleanField(default=False)
-    infinity = models.ForeignKey(Infinity, on_delete=models.CASCADE, blank=True, null=True)
+    system = models.ForeignKey(System, on_delete=models.CASCADE, blank=True, null=True)
 
-class InfStatus(models.Model):
+class Status(models.Model):
     rt = models.DecimalField(max_digits=4, decimal_places=1)
     rh = models.DecimalField(max_digits=4, decimal_places=1)
     current_activity = models.CharField(max_length=6)
@@ -53,4 +53,4 @@ class InfStatus(models.Model):
     filtrlvl = models.DecimalField(max_digits=4, decimal_places=1)
     humlvl = models.DecimalField(max_digits=4, decimal_places=1)
     humid = models.BooleanField(default=False)
-    infinity = models.OneToOneField(Infinity, on_delete=models.CASCADE, blank=True, null=True)
+    system = models.OneToOneField(System, on_delete=models.CASCADE, blank=True, null=True)

@@ -1,4 +1,4 @@
-from homeauto.models.house import Person
+from homeauto.models import Person
 from django.core import serializers
 from django.http import JsonResponse
 from django.forms.models import model_to_dict

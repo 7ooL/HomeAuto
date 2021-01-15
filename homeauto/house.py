@@ -1,14 +1,16 @@
 import logging, requests, json, smtplib, datetime, os, random, sys, subprocess, traceback
 from django.utils import timezone
 from django.contrib.auth.models import User
-from homeauto.models.hue import Sensor, Scene, Light, Group, Schedule
-from homeauto.models.wemo import Wemo
-from homeauto.models.decora import Switch
-from homeauto.models.vivint import Device, Panel
-from homeauto.models.house import Trigger, Nugget, Action, HouseLight, Account, Person, CustomEvent
-import homeauto.hue as HueAction
-import homeauto.wemo as WemoAction
-import homeauto.decora as DecoraAction
+from django.core.exceptions import ObjectDoesNotExist
+from homeauto.models import Trigger, Nugget, Action, HouseLight, Account, Person, CustomEvent
+from hue.models import Sensor, Scene, Light, Group, Schedule
+from wemo.models import Device as Wemo
+from decora.models import Switch
+from vivint.models import Device as VivintDevice
+from vivint.models import Panel
+import hue.actions as HueAction
+import wemo.actions as WemoAction
+import decora.actions as DecoraAction
 from datetime import timedelta
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
@@ -85,11 +87,11 @@ def register_watcher_event(event):
             if len(s) == 1:
                 try:
                     e = CustomEvent.objects.get(name=(s[0].lower()))
+                except ObjectDoesNotExist as e:
+                    logger.error(e)
+                    logger.error('There are no watcher events defined for: ' + s[0])
                 except:
                     logger.error("Error:"+ str(traceback.format_exc()))
-                    logger.error('There are no watcher events defined for: ' + s[0])
-                    remove_file(event.src_path)
-                    return
                 else:
                     try:
                         t = Trigger.objects.get(trigger=(Trigger.CUSTOM_EVENT), event__name=(e.name))
@@ -161,7 +163,7 @@ def register_motion_event(source, device_id):
     if 'Hue' in source:
         m = Sensor.objects.get(id=device_id)
     elif 'Vivint' in source:
-        m = Device.objects.get(id=device_id)
+        m = VivintDevice.objects.get(id=device_id)
     logger.info('Sensor{' + source + '}{' + m.name + '}{' + str(m.id) + '}{' + m.type + '}{Active}')
     try:
         t = Trigger.objects.get(trigger=(Trigger.MOTION), motion_detector__source_id=device_id)
@@ -182,7 +184,7 @@ def register_sensor_event(source, device_id, state):
     if 'Hue' in source:
         m = Sensor.objects.get(id=device_id)
     elif 'Vivint' in source:
-        m = Device.objects.get(id=device_id)
+        m = VivintDevice.objects.get(id=device_id)
     logger.info('Sensor{' + source + '}{' + m.name + '}{' + str(m.id) + '}{' + m.type + '}{' + state+'}')
     try:
         if state == 'Opened':
@@ -271,33 +273,39 @@ def check_time_triggers():
     triggers = Trigger.objects.filter(trigger=(Trigger.SCHEDULE))
     for t in triggers:
         if t.external_schedule.source == 1:
-            schedule = Schedule.objects.get(id=(t.external_schedule.source_id))
-            time = schedule.localtime
-            time_segments = time.split('/T', 1)
-            if 'T' in time_segments[0]:
-                start_time = datetime.datetime.strptime(time_segments[0].replace('T', ''), '%H:%M:%S').time()
-                if t.external_schedule_delay > 0:
-                        start_time = start_time + timedelta(minutes=t.external_schedule_delay)
-                end_time = datetime.datetime.strptime(time_segments[1], '%H:%M:%S').time()
-                if start_time <= timezone.localtime().time() <= end_time:
-                    register_time_event(t)
-            elif 'W' in time_segments[0]:
-                day = int(datetime.datetime.today().weekday()) + 1
-                day_mask = int(time_segments[0].replace('W', ''))
-                txt = '{0:08b}'
-                day_list = list(txt.format(day_mask))
-                if int(day_list[day]) == 1:
-                    start_time = datetime.datetime.strptime(time_segments[1].replace('T', ''), '%H:%M:%S')
+            try:
+                schedule = Schedule.objects.get(id=(t.external_schedule.source_id))
+            except ObjectDoesNotExist as e:
+                logger.error(e)
+            except:
+                logger.error("Error:"+ str(traceback.format_exc()))
+            else:
+                time = schedule.localtime
+                time_segments = time.split('/T', 1)
+                if 'T' in time_segments[0]:
+                    start_time = datetime.datetime.strptime(time_segments[0].replace('T', ''), '%H:%M:%S').time()
                     if t.external_schedule_delay > 0:
                         start_time = start_time + timedelta(minutes=t.external_schedule_delay)
-                    if len(time_segments) > 2:
-                        end_time = datetime.datetime.strptime(time_segments[2], '%H:%M:%S').time()
-                    else:
-                        end_time = (start_time + datetime.timedelta(minutes=1)).time()
-                    if start_time.time() <= timezone.localtime().time() <= end_time:
+                    end_time = datetime.datetime.strptime(time_segments[1], '%H:%M:%S').time()
+                    if start_time <= timezone.localtime().time() <= end_time:
                         register_time_event(t)
-            else:
-                logger.error('Hue time format in schedule not accounted for. ' + str(time))
+                elif 'W' in time_segments[0]:
+                    day = int(datetime.datetime.today().weekday()) + 1
+                    day_mask = int(time_segments[0].replace('W', ''))
+                    txt = '{0:08b}'
+                    day_list = list(txt.format(day_mask))
+                    if int(day_list[day]) == 1:
+                        start_time = datetime.datetime.strptime(time_segments[1].replace('T', ''), '%H:%M:%S')
+                        if t.external_schedule_delay > 0:
+                            start_time = start_time + timedelta(minutes=t.external_schedule_delay)
+                        if len(time_segments) > 2:
+                            end_time = datetime.datetime.strptime(time_segments[2], '%H:%M:%S').time()
+                        else:
+                            end_time = (start_time + datetime.timedelta(minutes=1)).time()
+                        if start_time.time() <= timezone.localtime().time() <= end_time:
+                            register_time_event(t)
+                else:
+                    logger.error('Hue time format in schedule not accounted for. ' + str(time))
         else:
             logger.warning('There is no external schedule parser setup for type: ' + Trigger.SOURCE[t.external_schedule.source])
 
@@ -337,19 +345,31 @@ def evaluate_nuggets(t_id):
                 else:
                     if t.trigger == t.MOTION:
                         if t.motion_detector.source == 0:
-                            state = Device.objects.get(id=(t.motion_detector.source_id)).state
-                            if state == 'Open':
-                                state = True
-                            elif state == 'Closed':
-                                state = False
+                            try:
+                                state = VivintDevice.objects.get(id=(t.motion_detector.source_id)).state
+                            except ObjectDoesNotExist as e:
+                                logger.error(e)
+                            except:
+                                logger.error("Error:"+ str(traceback.format_exc()))
                             else:
-                                state = False
-                            results.append(state)
-                            logger.debug('  TEST:  ' + nug.name + ':Vivint:' + t.motion_detector.name + ' state ' + str(state))
+                                if state == 'Open':
+                                    state = True
+                                elif state == 'Closed':
+                                    state = False
+                                else:
+                                    state = False
+                                results.append(state)
+                                logger.debug('  TEST:  ' + nug.name + ':Vivint:' + t.motion_detector.name + ' state ' + str(state))
                         elif t.motion_detector.source == 1:
-                            state = Sensor.objects.get(id=(t.motion_detector.source_id)).presence
-                            logger.debug('  TEST:  ' + nug.name + ':Hue:' + t.motion_detector.name + ' state ' + str(state))
-                            results.append(state)
+                            try:
+                                state = Sensor.objects.get(id=(t.motion_detector.source_id)).presence
+                            except ObjectDoesNotExist as e:
+                                logger.error(e)
+                            except:
+                                logger.error("Error:"+ str(traceback.format_exc()))
+                            else:
+                                logger.debug('  TEST:  ' + nug.name + ':Hue:' + t.motion_detector.name + ' state ' + str(state))
+                                results.append(state)
                         else:
                             logger.warning('There is no motion state lookup for source ' + str(t.motion_detector_id__source))
                             results.append(False)
@@ -400,13 +420,19 @@ def evaluate_nuggets(t_id):
                         logger.error('code has not been written for CUSTOM_EVENT trigger')
                         results.append(False)
                     elif t.trigger == t.SECURITY_ARMED_STATE:
-                        state = Panel.objects.get(id=(t.security_panel.id)).armed_state
-                        if state == t.security_armed_state:
-                            logger.debug("  TEST:  "+t.security_armed_state+' matches armed state '+state)
-                            results.append(True)
+                        try:
+                            state = Panel.objects.get(id=(t.security_panel.id)).armed_state
+                        except ObjectDoesNotExist as e:
+                            logger.error(e)
+                        except:
+                            logger.error("Error:"+ str(traceback.format_exc()))
                         else:
-                            logger.debug("  TEST:  "+t.security_armed_state+' does not match armed state '+state)
-                            results.append(False)
+                            if state == t.security_armed_state:
+                                logger.debug("  TEST:  "+t.security_armed_state+' matches armed state '+state)
+                                results.append(True)
+                            else:
+                                logger.debug("  TEST:  "+t.security_armed_state+' does not match armed state '+state)
+                                results.append(False)
                     elif t.trigger == t.PEOPLE:
                         if t.people_has_left:
                             try:

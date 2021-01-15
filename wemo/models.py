@@ -8,7 +8,7 @@ class Common(models.Model):
     created_date = models.DateTimeField(auto_now_add=True, blank=True)
     modified_date = models.DateTimeField(auto_now=True, blank=True)
     name = models.CharField(max_length=30)
-    enabled = models.BooleanField(default=False, verbose_name='Usable By HomeAuto')
+    enabled = models.BooleanField(default=False, verbose_name='Discoverable By HomeAuto')
     class Meta:
         ordering = ['name']
     def __str__(self):
@@ -19,9 +19,11 @@ class Common(models.Model):
         return '{} - {}'.format(self.name, enabled)
     class Meta:
         abstract = True
+#        app_label = 'Devices'
 
-class Directory(Common):
-    directory = models.CharField(max_length=120)
+class Device(Common):
+    type = models.CharField(max_length=30)
+    status = models.BooleanField(default=False, verbose_name='On')
 
 
 

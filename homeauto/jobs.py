@@ -1,24 +1,34 @@
 import apscheduler.job, re, os, logging
+from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ProcessPoolExecutor, ThreadPoolExecutor
-from datetime import datetime
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django_apscheduler.jobstores import register_events, register_job, DjangoJobStore
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
-from homeauto.models.house import Job, HouseMotionDetector, HouseLight, HouseLock, HouseSensor, Trigger, HouseSchedule
-from homeauto.models.hue import Sensor, Light, Group, Scene, Schedule
-from homeauto.models.wemo import Wemo
-from homeauto.models.decora import Switch
-from homeauto.models.vivint import Device
-from homeauto.admin_logs import log_addition, log_change, log_deletion
-import homeauto.hue as HueJobs
-import homeauto.vivint as VivintJobs
-import homeauto.wemo as WemoJobs
-import homeauto.decora as DecoraJobs
+
+from homeauto.models import Job, HouseMotionDetector, HouseLight, HouseLock, HouseSensor, Trigger, HouseSchedule
+
+from hue.models import Sensor as HueSensor
+from hue.models import Light as HueLight
+from hue.models import Group as HueGroup
+from hue.models import Schedule as HueSchedule
+import hue.jobs as HueJobs
+
+from wemo.models import Device as WemoDevice
+import wemo.jobs as WemoJobs
+
+from decora.models import Switch as DecoraSwitch
+import decora.jobs as DecoraJobs
+
+import vivint.jobs as VivintJobs
+from vivint.models import Device
+
+from homeauto.event_logs import log_addition, log_change, log_deletion
+
 import homeauto.house as HouseJobs
-import homeauto.infinity as InfinityJobs
+import carrier.control as CarrierJobs
 
 logger = logging.getLogger(__name__)
 scheduler = BackgroundScheduler(settings.SCHEDULER_CONFIG)
@@ -121,7 +131,7 @@ def create_job(job):
     elif job.command == 13:
         scheduler.add_job(find_sensors_job, 'interval', seconds=(job.interval), id=(job.COMMAND_TYPES[(job.command + 1)][1]), max_instances=1, replace_existing=True, coalesce=True)
     elif job.command == 14:
-        scheduler.add_job((InfinityJobs.sync_infinity), 'interval', seconds=(job.interval), id=(job.COMMAND_TYPES[(job.command + 1)][1]), max_instances=1, replace_existing=True, coalesce=True)
+        scheduler.add_job((CarrierJobs.sync_system), 'interval', seconds=(job.interval), id=(job.COMMAND_TYPES[(job.command + 1)][1]), max_instances=1, replace_existing=True, coalesce=True)
     elif job.command == 15:
         scheduler.add_job(find_schedules_job, 'interval', seconds=(job.interval), id=(job.COMMAND_TYPES[(job.command + 1)][1]), max_instances=1, replace_existing=True, coalesce=True)
     else:
@@ -148,7 +158,7 @@ def dropbox_job():
 
 
 def find_schedules_job():
-    for s in Schedule.objects.filter(enabled=True):
+    for s in HueSchedule.objects.filter(enabled=True):
         try:
             HouseSchedule.objects.get(source_id=(s.id), source=1, source_type=8)
         except ObjectDoesNotExist:
@@ -209,7 +219,7 @@ def find_motion_detectors_job():
             logger.info('Found new motion detector: ' + data['name'])
             log_addition(x)
 
-    for md in Sensor.objects.filter(enabled=True, motion_detector=True):
+    for md in HueSensor.objects.filter(enabled=True, motion_detector=True):
         try:
             HouseMotionDetector.objects.get(source_id=(md.id), source=1, source_type=7)
         except ObjectDoesNotExist:
@@ -225,7 +235,7 @@ def find_motion_detectors_job():
 
 
 def find_lights_job():
-    for l in Light.objects.filter(enabled=True):
+    for l in HueLight.objects.filter(enabled=True):
         try:
             HouseLight.objects.get(source_id=(l.id), source_type=0)
         except ObjectDoesNotExist:
@@ -239,7 +249,7 @@ def find_lights_job():
             logger.info('Found new house light: ' + data['name'])
             log_addition(x)
 
-    for l in Group.objects.filter(enabled=True):
+    for l in HueGroup.objects.filter(enabled=True):
         try:
             HouseLight.objects.get(source_id=(l.id), source_type=1)
         except ObjectDoesNotExist:
@@ -253,7 +263,7 @@ def find_lights_job():
             logger.info('Found new house light: ' + data['name'])
             log_addition(x)
 
-    for l in Switch.objects.filter(enabled=True):
+    for l in DecoraSwitch.objects.filter(enabled=True):
         try:
             HouseLight.objects.get(source_id=(l.id), source_type=3)
         except ObjectDoesNotExist:
@@ -267,7 +277,7 @@ def find_lights_job():
             logger.info('Found new house light: ' + data['name'])
             log_addition(x)
 
-    for l in Wemo.objects.filter(enabled=True):
+    for l in WemoDevice.objects.filter(enabled=True):
         try:
             HouseLight.objects.get(source_id=(l.id), source_type=4)
         except ObjectDoesNotExist:

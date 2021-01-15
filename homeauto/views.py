@@ -1,7 +1,7 @@
 from django.shortcuts import render
-import homeauto.models.house as house
-import homeauto.models.hue as hue
-import homeauto.models.wemo as device
+import homeauto.models as house
+import hue.models as hue
+#import homeauto.models.wemo as device
 from django.http import JsonResponse
 import simplejson as json
 
@@ -39,12 +39,12 @@ def service_detail(request, pk):
     return render(request, 'service_detail.html', context)
 
 
-def lights_index(request):
-    lights = hue.Light.objects.all()
-    wemos = device.Wemo.objects.all()
-    context = {'lights':lights, 
-     'wemos':wemos}
-    return render(request, 'lights_index.html', context)
+#def lights_index(request):
+#    lights = hue.Light.objects.all()
+#    wemos = device.Wemo.objects.all()
+#    context = {'lights':lights, 
+#     'wemos':wemos}
+#    return render(request, 'lights_index.html', context)
 
 
 def light_detail(request):

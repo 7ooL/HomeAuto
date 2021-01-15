@@ -17,9 +17,13 @@ class Config(AppConfig):
         def ready(self):
             logger.warning("HomeAuto Starting...")
 
-            from homeauto import jobs, watcher, vivint
+            from homeauto import jobs
             jobs.start()
-            vivint.start()
+
+            import watchers.apps as watcher
             watcher.clean()
             watcher.start()
+
+            import vivint.apps as vivint
+            vivint.start()
 

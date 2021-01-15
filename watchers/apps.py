@@ -1,12 +1,14 @@
-import time, logging, sys, os
-from watchdog.observers import Observer
-from watchdog.events import  (
-    PatternMatchingEventHandler, FileModifiedEvent,
-    FileCreatedEvent)
-from homeauto.models.watcher import Directory
+from django.apps import AppConfig
+from watchers.models import Directory
 from homeauto.house import register_watcher_event
+from watchdog.observers import Observer
+from watchdog.events import PatternMatchingEventHandler
+import time, logging, os
 
 logger = logging.getLogger(__name__)
+
+class WatchersConfig(AppConfig):
+    name = 'watchers'
 
 def clean():
     directories = Directory.objects.all()
@@ -49,7 +51,7 @@ class Watcher:
         observer.schedule(event_handler=Handler('*'), path=self.DIRECTORY_TO_WATCH)
         observer.daemon = False
         try:
-            observer.start() 
+            observer.start()
         except KeyboardInterrupt:
             logger.error('Watcher Stopped.')
         observer.join(2)
@@ -61,6 +63,4 @@ class Handler(PatternMatchingEventHandler):
         logger.debug('New event - %s.' % event)
         if event.event_type == 'created':
             register_watcher_event(event)
-
-
 

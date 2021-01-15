@@ -4,11 +4,10 @@ from django.db import transaction
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 
-from .hue import Group, Sensor, Scene
-from .wemo import Wemo
-from .decora import Switch
-from .vivint import Device, Panel
-from .infinity import Infinity
+from hue.models import Scene as HueScene
+from vivint.models import Panel
+from watchers.models import CustomEvent
+from carrier.models import System
 
 #import apscheduler.job as Test
 
@@ -84,7 +83,7 @@ class Job(models.Model):
         (11,'Evaluate Time Based Triggers'),
         (12,'Find House Locks in Devices'),
         (13,'Find House Sensors in Devices'),
-        (14,'Infinity Pull DB Update'),
+        (14,'Carrier Pull DB Update'),
         (15,'Find House Schedules in Devices'),
     )
     command = models.IntegerField(choices=COMMAND_TYPES, default='')
@@ -109,14 +108,6 @@ class Job(models.Model):
 #        with transaction.atomic():
 
 
-
-class CustomEvent(models.Model):
-    name = models.CharField(max_length=60, primary_key=True)
-    def __str__(self):
-        return '{}'.format(self.name)
-    def save(self, *args, **kwargs):
-        self.name = self.name.lower()
-        super(CustomEvent, self).save(*args, **kwargs)
 
 class Person(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -220,7 +211,7 @@ class Trigger(Common):
     security_armed_to = models.BooleanField(default=False, verbose_name="When person sets state to")
     security_changed_to = models.BooleanField(default=False, verbose_name="When state changes to")
     security_armed_state =  models.CharField(max_length=60,choices=Common.ARM_STATES, default=Common.DISARMED, verbose_name="Armed State")
-    hvac_unit = models.ManyToManyField(Infinity, blank=True)
+    hvac_unit = models.ManyToManyField(System, blank=True)
     hvac_profile = models.CharField(max_length=60,choices=Common.HVAC_PROFILES, default=Common.HOME)
     hvac_value = models.IntegerField(default=0)
     hvac_hold = models.BooleanField(default=False)
@@ -279,11 +270,11 @@ class Action(Common):
 
     action = models.CharField(max_length=60,choices=ACTION_TYPES, default=TURN_ON)
     lights = models.ManyToManyField(HouseLight, blank=True)
-    scenes = models.ManyToManyField(Scene,blank=True)
+    scenes = models.ManyToManyField(HueScene,blank=True)
     scenes_transition_time = models.IntegerField(default=4,verbose_name='Transition Time (seconds)') 
     people = models.ManyToManyField(Person,blank=True)
     text_message = models.CharField(max_length=120, default="", blank=True, null=True)
-    hvac_unit = models.ManyToManyField(Infinity, blank=True)
+    hvac_unit = models.ManyToManyField(System, blank=True)
     hvac_actions = models.CharField(max_length=60,choices=HVAC_ACTIONS, default=REMOVE_HOLD)
     people =  models.ManyToManyField(Person, blank=True)
     triggers = models.ManyToManyField(Trigger, blank=True)

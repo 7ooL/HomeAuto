@@ -27,12 +27,19 @@ INSTALLED_APPS = [
     'homeauto.apps.Config',
     'homeauto.apps.MyAdminConfig',
     'django_apscheduler',
-#    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'wemo',
+    'api_decora',
+    'decora',
+    'hue',
+    'vivint',
+    'watchers',
+    'carrier',
+
 ]
 
 

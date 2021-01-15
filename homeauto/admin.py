@@ -18,12 +18,32 @@ admin.site.site_url = 'http://ha:8080.com/'
 admin.site.index_title = 'House Administration'
 admin.site.index_template = 'admin/ha_index.html'
 
+# global actions for objects
+def make_discoverable(modeladmin, request, queryset):
+    queryset.update(enabled=True)
+make_discoverable.short_description = "Discoverable by HomeAuto"
+
+def remove_discoverable(modeladmin, request, queryset):
+    queryset.update(enabled=False)
+remove_discoverable.short_description = "Hide from HomeAuto"
+
+# global actions for objects
+def enable(modeladmin, request, queryset):
+    queryset.update(enabled=True)
+enable.short_description = "Enable Selected"
+
+def disable(modeladmin, request, queryset):
+    queryset.update(enabled=False)
+disable.short_description = "Disable Selected"
+
+
+
 # log entry (activity log)
 from django.contrib.admin.models import LogEntry
 
 class adminLogEntry(admin.ModelAdmin):
     list_display = ('object_repr', 'action_flag', 'user', 'content_type', 'object_id')
-    list_filter = ('action_flag', 'user')
+    list_filter = ('action_flag', 'user', 'content_type')
     search_fields = ('object_repr',)
 
 admin.site.register(LogEntry, adminLogEntry)
@@ -42,53 +62,53 @@ class DjangoJobExecutionAdmin(admin.ModelAdmin):
 admin.site.register(DjangoJob, DjangoJobAdmin)
 admin.site.register(DjangoJobExecution, DjangoJobExecutionAdmin)
 
-# global actions for objects
-def make_discoverable(modeladmin, request, queryset):
-    queryset.update(enabled=True)
-make_discoverable.short_description = "Make selected objects discoverable by HomeAuto"
-
-def remove_discoverable(modeladmin, request, queryset):
-    queryset.update(enabled=False)
-remove_discoverable.short_description = "Remove discoverability by HomeAuto"
-
 # house models
-import homeauto.models.house as house
+import homeauto.models as house
 
 class JobAdmin(admin.ModelAdmin):
     list_display = ('command', 'id', 'interval', 'enabled')
     list_filter = ('enabled',)
+    actions = [enable, disable]
 class AccountAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'username', 'enabled')
     list_filter = ('enabled',)
+    actions = [enable, disable]
 class HouseMotionDetectorAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'enabled', 'source', 'source_id')
     list_filter = ('enabled','source')
     search_fields = ('name','source')
+    actions = [enable, disable]
 class HouseLightAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'enabled', 'source', 'source_type', 'source_id')
     list_filter = ('source', 'source_type')
     search_fields = ('name','source', 'source_type')
+    actions = [enable, disable]
 class HouseLockAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'enabled', 'source', 'source_type', 'source_id')
     list_filter = ('source', 'source_type')
     search_fields = ('name','source', 'source_type')
+    actions = [enable, disable]
 class HouseSensorAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'enabled', 'source', 'source_type', 'source_id')
     list_filter = ('source', 'source_type')
     search_fields = ('name','source', 'source_type')
+    actions = [enable, disable]
 class HouseScheduleAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'enabled', 'source', 'source_type', 'source_id')
     list_filter = ('source', 'source_type')
     search_fields = ('name','source', 'source_type')
+    actions = [enable, disable]
 class TriggerAdmin(admin.ModelAdmin):
     search_fields = ('name','trigger')
     list_display = ('name', 'enabled', 'trigger', 'id')
     list_filter = ('enabled', 'trigger')
     change_form_template = 'trigger_edit.html'
+    actions = [enable, disable]
 class ActionAdmin(admin.ModelAdmin):
     search_fields = ['name']
     list_display = ('name', 'enabled', 'action', 'last_action_time')
     list_filter = ('enabled', 'action')
+    actions = [enable, disable]
 
 from django.urls import reverse
 from django.utils.html import format_html
@@ -152,113 +172,4 @@ class UserAdmin(BaseUserAdmin):
     inlines = (PersonInline,)
 
 admin.site.register(User, UserAdmin)
-
-# carrier infinity models
-import homeauto.models.infinity as infinity
-
-class InfinityAdmin(admin.ModelAdmin):
-    list_display = ('name', 'enabled', 'ip', 'port', 'mode')
-class InfStatusAdmin(admin.ModelAdmin):
-    list_display = ('infinity', 'current_activity', 'heat_mode', 'filtrlvl', 'hold', 'fan', 'vaca_running')
-class InfProfileAdmin(admin.ModelAdmin):
-    list_display = ('infinity', 'name', 'fan', 'clsp', 'htsp')
-    list_filter = ('infinity', 'name')
-class InfActivityAdmin(admin.ModelAdmin):
-    list_display = ('infinity', 'activity', 'enabled', 'time', 'day', 'period')
-    list_filter = ('infinity', 'activity', 'day', 'period', 'enabled')
-
-admin.site.register(infinity.InfStatus, InfStatusAdmin)
-admin.site.register(infinity.InfProfile, InfProfileAdmin)
-admin.site.register(infinity.Infinity, InfinityAdmin)
-admin.site.register(infinity.InfActivity, InfActivityAdmin)
-
-# watcher model
-import homeauto.models.watcher as watcher
-
-class WatcherAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id', 'enabled', 'directory')
-    search_fields = ('name',)
-    actions = [make_discoverable, remove_discoverable]
-
-admin.site.register(watcher.Directory, WatcherAdmin)
-
-# wemo models
-import homeauto.models.wemo as wemo
-
-class WemoAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id', 'type', 'status', 'enabled')
-    list_filter = ('type','status','enabled')
-    search_fields = ('name',)
-    actions = [make_discoverable, remove_discoverable]
-
-admin.site.register(wemo.Wemo, WemoAdmin)
-
-# decora models
-import homeauto.models.decora as decora
-
-class DecoraSwitchAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id', 'model', 'power', 'enabled')
-    list_filter = ('model','power','enabled')
-    search_fields = ('name',)
-    actions = [make_discoverable, remove_discoverable]
-
-admin.site.register(decora.Switch, DecoraSwitchAdmin)
-
-# vivint models
-import homeauto.models.vivint as vivint
-
-class VivintPanelAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id', 'armed_state', 'street', 'city')
-class VivintDeviceAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id', 'state', 'type', 'enabled')
-    list_filter = ('state', 'type', 'enabled')
-    search_fields = ('name','state','type')
-    actions = [make_discoverable, remove_discoverable]
-
-admin.site.register(vivint.Panel, VivintPanelAdmin)
-admin.site.register(vivint.Device, VivintDeviceAdmin)
-
-# hue models
-import homeauto.models.hue as hue
-
-class HueGroupAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id', 'type', 'on', 'enabled')
-    list_filter = ('type','on','enabled')
-    search_fields = ('name',)
-    actions = [make_discoverable, remove_discoverable]
-class HueLightAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id', 'type', 'modelid', 'on', 'enabled')
-    list_filter = ('type', 'modelid', 'on', 'enabled')
-    actions = [make_discoverable, remove_discoverable]
-    search_fields = ('name',)
-class HueSceneAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'group', 'enabled', 'owner')
-    list_filter = ('group','enabled', 'owner')
-    search_fields = ('name',)
-    actions = [make_discoverable, remove_discoverable]
-class HueBridgeAdmin(admin.ModelAdmin):
-    list_display = ('ip', 'id', 'alarm_use', 'count_down_lights', 'enabled')
-    actions = [make_discoverable, remove_discoverable]
-class HueSensorAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id', 'presence', 'productname', 'lastupdated', 'battery','enabled')
-    list_filter = ('presence','enabled', 'productname')
-    actions = [make_discoverable, remove_discoverable]
-    search_fields = ('name','productname')
-class HueScheduleAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id', 'localtime', 'enabled')
-    search_fields = ('name',)
-    actions = [make_discoverable, remove_discoverable]
-
-admin.site.register(hue.Schedule, HueScheduleAdmin)
-admin.site.register(hue.SceneLightstate)
-admin.site.register(hue.Sensor, HueSensorAdmin)
-admin.site.register(hue.Bridge, HueBridgeAdmin)
-admin.site.register(hue.Scene, HueSceneAdmin)
-admin.site.register(hue.Light, HueLightAdmin)
-admin.site.register(hue.Group, HueGroupAdmin)
-
-
-
-
-
 

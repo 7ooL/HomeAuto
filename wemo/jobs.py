@@ -1,39 +1,8 @@
-from django.conf import settings
-from homeauto.models.wemo import Wemo
+from wemo.models import Device
+from homeauto.event_logs import log_addition, log_change, log_deletion
 import subprocess, logging
-from homeauto.admin_logs import log_addition, log_change, log_deletion
 
 logger = logging.getLogger(__name__)
-
-def turn_on_light(device):
-    if device.enabled:
-        if not device.status:
-            cmd = '/usr/local/bin/wemo switch "' + device.name + '" on'
-            proc = subprocess.Popen([cmd], stdout=(subprocess.PIPE), shell=True)
-            out, err = proc.communicate()
-            logger.info(cmd+"-"+str(device.id))
-            return True
-        else:
-            logger.debug('device ' + device.name + '(' + str(device.id) + ') is already on')
-    else:
-        logger.warning('device ' + device.name + '(' + str(device.id) + ') not enabled')
-    return False
-
-
-def turn_off_light(device):
-    if device.enabled:
-        if device.status:
-            cmd = '/usr/local/bin/wemo switch "' + device.name + '" off'
-            proc = subprocess.Popen([cmd], stdout=(subprocess.PIPE), shell=True)
-            out, err = proc.communicate()
-            logger.info(cmd+"-"+str(device.id))
-            return True
-        else:
-            logger.debug('device ' + device.name + '(' + str(device.id) + ') is already off')
-    else:
-        logger.warning('device ' + device.name + '(' + str(device.id) + ') not enabled')
-    return False
-
 
 def sync_wemo():
     from distutils.spawn import find_executable
@@ -65,7 +34,7 @@ def sync_wemo():
                 x = x + 1
             for device in devices:
                 logger.debug("device: "+str(device))
-                if not Wemo.objects.filter(name=(device[1])).exists():
+                if not Device.objects.filter(name__iexact=(device[1])).exists():
                     logger.debug('Name: ' + str(device[1]) + ' does not exist')
                     logger.debug(device)
                     logger.info('Creating wemo:' + device[1])
@@ -73,11 +42,15 @@ def sync_wemo():
                     data['status'] = device[2]
                     data['type'] = device[0]
                     data['name'] = device[1]
-                    w = (Wemo.objects.create)(**data)
+                    w = (Device.objects.create)(**data)
                     w.save()
                     log_addition(w)
                 else:
-                    xWemo = Wemo.objects.get(name=(device[1]))
+                    xWemo = Device.objects.get(name__iexact=(device[1]))
+                    if xWemo.name != device[1]:
+                        logger.info('Updating name for ' + str(device[1]) + ': ' + str(device[2]))
+                        xWemo.name = device[1]
+                        xWemo.save()
                     if xWemo.type != device[0]:
                         logger.info('Updating type for ' + str(device[1]) + ': ' + str(device[2]))
                         xWemo.type = device[0]
