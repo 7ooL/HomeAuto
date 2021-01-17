@@ -17,6 +17,8 @@ class Common(models.Model):
         abstract = True
 
 class Directory(Common):
+    class Meta:
+        verbose_name_plural = 'Directories'
     directory = models.CharField(max_length=120)
 
 

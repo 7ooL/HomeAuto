@@ -30,6 +30,8 @@ class Profile(models.Model):
     system = models.ForeignKey(System, on_delete=models.CASCADE, blank=True, null=True)
 
 class Activity(models.Model):
+    class Meta:
+        verbose_name_plural = 'Activities'
     DAYS = ((0,"Sunday"),(1,"Monday"),(2,"Tuesday"),(3,"Wednesday"),(4,"Thursday"),(5,"Friday"),(6,"Saturday"))
     time = models.TimeField(default=timezone.now)
     activity = models.CharField(max_length=6)
@@ -39,6 +41,8 @@ class Activity(models.Model):
     system = models.ForeignKey(System, on_delete=models.CASCADE, blank=True, null=True)
 
 class Status(models.Model):
+    class Meta:
+        verbose_name_plural = 'Statuses'
     rt = models.DecimalField(max_digits=4, decimal_places=1)
     rh = models.DecimalField(max_digits=4, decimal_places=1)
     current_activity = models.CharField(max_length=6)
