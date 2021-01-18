@@ -1,43 +1,53 @@
 from django.apps import AppConfig
-from watchers.models import Directory
-from homeauto.house import register_watcher_event
-from watchdog.observers import Observer
+import time, logging, os, sys
 from watchdog.events import PatternMatchingEventHandler
-import time, logging, os
+from watchdog.observers import Observer
+
 
 logger = logging.getLogger(__name__)
 
 class WatchersConfig(AppConfig):
     name = 'watchers'
+    verbose_name = "Directory Watchers"
 
-def clean():
-    directories = Directory.objects.all()
-    if directories:
-        for directory in directories:
-            if directory.enabled:
-                # cleanup directory before starting
-                filelist = [ f for f in os.listdir(directory.directory) ]
-                for f in filelist:
-                    os.remove(os.path.join(directory.directory, f))
-                    logger.warning("cleaning up file: "+f)
-            else:
-                logger.warning('Directory: ' + directory.directory + ' is not enabled')
-    else:
-        logger.error('Will not start watchers on directories as none exist')
+    if 'runserver' in sys.argv:
+        def ready(self):
+            logger.warning('Starting Watcher App')
+            self.clean()
+            self.start()
 
-def start():
+    def clean(self):
+        from watchers.models import Directory
+        directories = Directory.objects.all()
+        if directories:
+            for directory in directories:
+                if directory.enabled:
+                    # cleanup directory before starting
+                    filelist = [ f for f in os.listdir(directory.directory) ]
+                    for f in filelist:
+                        os.remove(os.path.join(directory.directory, f))
+                        logger.warning("cleaning up file: "+f)
+                else:
+                    logger.warning('Directory: ' + directory.directory + ' is not enabled')
+        else:
+            logger.error('Will not start watchers on directories as none exist')
 
-    logger.info("Starting Watchers")
-    directories = Directory.objects.all()
-    if directories:
-        for directory in directories:
-            if directory.enabled:
-                w = Watcher(directory.directory)
-                w.run()
-            else:
-                logger.warning('Directory: ' + directory.directory + ' is not enabled')
-    else:
-        logger.error('Will not start watchers on directories as none exist')
+    def start(self):
+        from watchers.models import Directory
+        directories = Directory.objects.all()
+        if directories:
+           for directory in directories:
+                if directory.enabled:
+                    logger.info("Starting Watcher on: "+directory.directory)
+                    w = Watcher(directory.directory)
+                    try:
+                        w.run()
+                    except KeyboardInterrupt:
+                        logger.error('Watcher Stopped.')
+                else:
+                   logger.warning('Directory: ' + directory.directory + ' is not enabled')
+        else:
+            logger.error('Will not start watchers on directories as none exist')
 
 
 class Watcher:
@@ -56,10 +66,12 @@ class Watcher:
             logger.error('Watcher Stopped.')
         observer.join(2)
 
+
 class Handler(PatternMatchingEventHandler):
 
     @staticmethod
     def on_any_event(event):
+        from homeauto.house import register_watcher_event
         logger.debug('New event - %s.' % event)
         if event.event_type == 'created':
             register_watcher_event(event)
