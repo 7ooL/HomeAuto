@@ -1,12 +1,10 @@
 
 from django.contrib.admin.apps import AdminConfig
+from django.apps import AppConfig
+import sys, logging
 
 class MyAdminConfig(AdminConfig):
     default_site = 'homeauto.admin.MyAdminSite'
-
-from django.apps import AppConfig
-import sys, logging
-import multiprocessing
 
 logger = logging.getLogger(__name__)
 
@@ -19,11 +17,4 @@ class Config(AppConfig):
 
             from homeauto import jobs
             jobs.start()
-
-            import watchers.apps as watcher
-            watcher.clean()
-            watcher.start()
-
-            import vivint.apps as vivint
-            vivint.start()
 
