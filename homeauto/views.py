@@ -1,20 +1,22 @@
+
 from django.shortcuts import render
-import homeauto.models as house
-import hue.models as hue
+#import homeauto.models as house
+#import hue.models as hue
 #import homeauto.models.wemo as device
 from django.http import JsonResponse
 import simplejson as json
 
 def dashboard_index(request):
-    persons = house.Person.objects.all()
-    services = house.Service.objects.all()
-    lights = hue.Light.objects.all()
-    context = {'persons':persons, 
-     'services':services, 
-     'lights':lights}
+#    persons = house.Person.objects.all()
+#    services = house.Service.objects.all()
+#    lights = hue.Light.objects.all()
+#    context = {'persons':persons, 
+#     'services':services, 
+#     'lights':lights}
+    context = {}
     return render(request, 'dashboard_index.html', context)
 
-
+"""
 def people_index(request):
     persons = house.Person.objects.all()
     context = {'persons': persons}
@@ -65,3 +67,4 @@ def scenes_index(request):
 
 def scene_detail(request):
     return render(request, 'scene_detail.html', context)
+"""
