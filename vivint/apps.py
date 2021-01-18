@@ -9,7 +9,7 @@ class VivintConfig(AppConfig):
     verbose_name = "Vivint Security System"
     if 'runserver' in sys.argv:
         def ready(self):
-            logger.warning('Starting Vivint App')
+            logger.debug('Starting Vivint App')
             self.start()
 
     def start(self):

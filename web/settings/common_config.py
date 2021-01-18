@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'vivint.apps.VivintConfig',
     'api_decora',
     'decora.apps.DecorasConfig',
-
+    'jobs.apps.JobsConfig',
 
     'wemo',
     'hue',

@@ -62,7 +62,7 @@ LOGGING = {
 #        },
         'homeauto.apps': {
             'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
         'django.server': {
             'handlers': ['file', 'console'],

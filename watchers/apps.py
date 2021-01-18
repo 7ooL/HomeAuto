@@ -12,7 +12,7 @@ class WatchersConfig(AppConfig):
 
     if 'runserver' in sys.argv:
         def ready(self):
-            logger.warning('Starting Watcher App')
+            logger.debug('Starting Watcher App')
             self.clean()
             self.start()
 

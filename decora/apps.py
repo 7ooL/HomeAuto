@@ -9,5 +9,5 @@ class DecorasConfig(AppConfig):
 
     if 'runserver' in sys.argv:
         def ready(self):
-            logger.warning('Starting Decora App')
+            logger.debug('Starting Decora App')
 
