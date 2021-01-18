@@ -14,12 +14,6 @@ class Common(models.Model):
         abstract = True
         ordering = ['name']
 
-class SingletonModel(models.Model):
-
-    class Meta:
-        abstract = True
-
-
 class Device(Common):
     type = models.CharField(max_length=30)
     state = models.CharField(max_length=30, blank=True)
