@@ -1,7 +1,7 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 import logging
-
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
@@ -19,6 +19,25 @@ class Common(models.Model):
         else:
           enabled = "DISABLED"
         return '{} - {}'.format(self.name, enabled)
+
+class Account(models.Model):
+    class Meta:
+        verbose_name_plural = 'API Account'
+    user = models.OneToOneField(User, related_name='decora_account_created', on_delete=models.CASCADE)
+    decora_username = models.CharField(max_length=60)
+    decora_password = models.CharField(max_length=60)
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super(Account, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        pass
+
+    @classmethod
+    def load(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
 
 
 class Switch(Common):
