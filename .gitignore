@@ -1,4 +1,4 @@
 secret.py
-homeauto/migrations/
+*/migrations/
 *.pyc 
 *.log
