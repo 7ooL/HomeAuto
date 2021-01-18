@@ -116,6 +116,10 @@ LOGGING = {
             'handlers': ['file', 'console'],
             'level': 'INFO',
         },
+        'test_job.apps': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+        },
 #        'apscheduler': {
 #            'handlers': ['console', 'file'],
 #            'level': 'DEBUG',

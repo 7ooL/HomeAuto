@@ -23,21 +23,28 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Application definition
 INSTALLED_APPS = [
-    'admin_reorder',
+
+#    'admin_reorder',
+
     'homeauto.apps.Config',
     'homeauto.apps.MyAdminConfig',
+#    'django.contrib.admin',
     'django_apscheduler',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'wemo',
+
+    'test_job.apps.Config',
+    'watchers.apps.WatchersConfig',
+    'vivint.apps.VivintConfig',
     'api_decora',
-    'decora',
+    'decora.apps.DecorasConfig',
+
+
+    'wemo',
     'hue',
-    'vivint',
-    'watchers',
     'carrier',
 
 ]
@@ -64,7 +71,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'admin_reorder.middleware.ModelAdminReorder',
+#    'admin_reorder.middleware.ModelAdminReorder',
 ]
 
 ROOT_URLCONF = 'web.urls'
