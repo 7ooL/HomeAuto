@@ -37,7 +37,6 @@ def disable(modeladmin, request, queryset):
 disable.short_description = "Disable Selected"
 
 
-
 # log entry (activity log)
 from django.contrib.admin.models import LogEntry
 
@@ -48,27 +47,9 @@ class adminLogEntry(admin.ModelAdmin):
 
 admin.site.register(LogEntry, adminLogEntry)
 
-# job models
-from django_apscheduler.models import DjangoJobExecution
-from django_apscheduler.models import DjangoJob
-
-class DjangoJobAdmin(admin.ModelAdmin):
-    list_display = ('name', 'next_run_time')
-    search_fields = ('name',)
-class DjangoJobExecutionAdmin(admin.ModelAdmin):
-    list_display = ('job', 'status', 'run_time', 'duration')
-    list_filter = ('status', )
-
-admin.site.register(DjangoJob, DjangoJobAdmin)
-admin.site.register(DjangoJobExecution, DjangoJobExecutionAdmin)
-
 # house models
 import homeauto.models as house
 
-class JobAdmin(admin.ModelAdmin):
-    list_display = ('command', 'id', 'interval', 'enabled')
-    list_filter = ('enabled',)
-    actions = [enable, disable]
 class AccountAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'username', 'enabled')
     list_filter = ('enabled',)
@@ -153,7 +134,6 @@ admin.site.register(house.HouseSchedule, HouseScheduleAdmin)
 admin.site.register(house.Trigger, TriggerAdmin)
 admin.site.register(house.Account, AccountAdmin)
 admin.site.register(house.CustomEvent)
-admin.site.register(house.Job, JobAdmin)
 admin.site.register(house.Nugget, NuggetAdmin)
 
 # user models

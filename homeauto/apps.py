@@ -13,8 +13,5 @@ class Config(AppConfig):
     if 'runserver' in sys.argv:
 
         def ready(self):
-            logger.warning("HomeAuto Starting...")
-
-            from homeauto import jobs
-            jobs.start()
+            logger.debug("Starting HomeAuto App")
 

@@ -8,7 +8,9 @@ from django_apscheduler.jobstores import register_events, register_job, DjangoJo
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
-from homeauto.models import Job, HouseMotionDetector, HouseLight, HouseLock, HouseSensor, Trigger, HouseSchedule
+from homeauto.models import HouseMotionDetector, HouseLight, HouseLock, HouseSensor, Trigger, HouseSchedule
+
+from jobs.models import Job
 
 from hue.models import Sensor as HueSensor
 from hue.models import Light as HueLight
@@ -102,6 +104,7 @@ def create_job(job):
         existingJob = scheduler.get_job(job.COMMAND_TYPES[(job.command + 1)][1])
         existingJob.resume()
         logger.info('Updating ' + job.COMMAND_TYPES[(job.command + 1)][1] + ' Service')
+
     elif job.command == 0:
         scheduler.add_job(dropbox_job, 'interval', seconds=(job.interval), id=(job.COMMAND_TYPES[(job.command + 1)][1]), max_instances=1, replace_existing=True, coalesce=True)
     elif job.command == 1:
@@ -136,7 +139,6 @@ def create_job(job):
         scheduler.add_job(find_schedules_job, 'interval', seconds=(job.interval), id=(job.COMMAND_TYPES[(job.command + 1)][1]), max_instances=1, replace_existing=True, coalesce=True)
     else:
         logger.warning('No job has been created for command: ' + job.COMMAND_TYPES[(job.command + 1)][1])
-
 
 def dropbox_job():
     pidfile = '/home/ha/.dropbox/dropbox.pid'
