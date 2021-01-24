@@ -76,7 +76,7 @@ LOGGING = {
             'handlers': ['file', 'console'],
             'level': 'INFO',
         },
-        'homeauto.jobs': {
+        'jobs': {
             'handlers': ['file', 'console'],
             'level': 'INFO',
         },
@@ -115,10 +115,6 @@ LOGGING = {
         'api_decora': {
             'handlers': ['file', 'console'],
             'level': 'INFO',
-        },
-        'test_job.apps': {
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
         },
 #        'apscheduler': {
 #            'handlers': ['console', 'file'],

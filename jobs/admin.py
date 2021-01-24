@@ -12,31 +12,53 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
 from django_apscheduler.models import DjangoJob, DjangoJobExecution
+from django_apscheduler.admin import DjangoJobAdmin, DjangoJobExecutionAdmin
 from django_apscheduler import util
 from django_apscheduler.jobstores import DjangoJobStore, DjangoMemoryJobStore
 
-# job models
-from django_apscheduler.models import DjangoJobExecution
-from django_apscheduler.models import DjangoJob
-from django_apscheduler.admin import DjangoJobAdmin, DjangoJobExecutionAdmin
+from django import forms
+from .fields import GroupedModelChoiceField
+from .models import Command, Group, Job
 
-#class DjangoJobAdmin(admin.ModelAdmin):
-#    list_display = ('name', 'next_run_time')
-#    search_fields = ('name',)
-#class DjangoJobExecutionAdmin(admin.ModelAdmin):
-#    list_display = ('job', 'status', 'run_time', 'duration')
-#    list_filter = ('status', )
-
-#admin.site.register(DjangoJob, DjangoJobAdmin)
 admin.site.register(DjangoJob, DjangoJobAdmin)
 admin.site.register(DjangoJobExecution, DjangoJobExecutionAdmin)
 
-from jobs.models import Job
-from homeauto.admin import enable, disable
+class CommandAdmin(admin.ModelAdmin):
+    list_display = ('name','group')
+admin.site.register(Command, CommandAdmin)
+
+class GroupAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+admin.site.register(Group, GroupAdmin)
+
+
+def enable(modeladmin, request, queryset):
+    for obj in  queryset:
+        obj.enable=True
+        obj.save()
+enable.short_description = "Enable Selected"
+
+def disable(modeladmin, request, queryset):
+    for obj in  queryset:
+        obj.enable=False
+        obj.save()
+disable.short_description = "Disable Selected"
+
+class JobForm(forms.ModelForm):
+    command = GroupedModelChoiceField(
+        queryset=Command.objects.exclude(group=None),
+        choices_groupby='group'
+    )
+
+    class Meta:
+        model = Job
+        fields = ('command', 'interval', 'enabled')
 
 class JobAdmin(admin.ModelAdmin):
     list_display = ('command', 'id', 'interval', 'enabled')
     list_filter = ('enabled',)
     actions = [enable, disable]
+    form = JobForm
+
 admin.site.register(Job, JobAdmin)
 

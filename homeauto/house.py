@@ -210,7 +210,7 @@ def register_sensor_event(source, device_id, state):
         evaluate_nuggets(t.id)
 
 
-def check_secuirty_trigger(t):
+def check_security_trigger(t):
     if t.enabled:
         if t.security_armed_to:
             logger.debug("Looking for triggers with security_armed_to flagged")
@@ -242,9 +242,9 @@ def register_security_event(the_who, state):
         logger.debug('found '+str(triggers.count())+' tiggers with '+state)
         if triggers.count() > 1:
             for trigger in triggers:
-                 check_secuirty_trigger(trigger)
+                 check_security_trigger(trigger)
         else:
-            check_secuirty_trigger(triggers.first())
+            check_security_trigger(triggers.first())
 
 
 
@@ -262,52 +262,6 @@ def register_time_event(t):
         evaluate_nuggets(t.id)
     else:
         logger.debug('Trigger:{' + t.name + '}{' + str(t.id) + '}{disabled}')
-
-
-def check_time_triggers():
-    triggers = Trigger.objects.filter(trigger=(Trigger.WINDOW))
-    for t in triggers:
-        if t.window_start <= timezone.localtime().time() <= t.window_end:
-            register_time_event(t)
-
-    triggers = Trigger.objects.filter(trigger=(Trigger.SCHEDULE))
-    for t in triggers:
-        if t.external_schedule.source == 1:
-            try:
-                schedule = Schedule.objects.get(id=(t.external_schedule.source_id))
-            except ObjectDoesNotExist as e:
-                logger.error(e)
-            except:
-                logger.error("Error:"+ str(traceback.format_exc()))
-            else:
-                time = schedule.localtime
-                time_segments = time.split('/T', 1)
-                if 'T' in time_segments[0]:
-                    start_time = datetime.datetime.strptime(time_segments[0].replace('T', ''), '%H:%M:%S').time()
-                    if t.external_schedule_delay > 0:
-                        start_time = start_time + timedelta(minutes=t.external_schedule_delay)
-                    end_time = datetime.datetime.strptime(time_segments[1], '%H:%M:%S').time()
-                    if start_time <= timezone.localtime().time() <= end_time:
-                        register_time_event(t)
-                elif 'W' in time_segments[0]:
-                    day = int(datetime.datetime.today().weekday()) + 1
-                    day_mask = int(time_segments[0].replace('W', ''))
-                    txt = '{0:08b}'
-                    day_list = list(txt.format(day_mask))
-                    if int(day_list[day]) == 1:
-                        start_time = datetime.datetime.strptime(time_segments[1].replace('T', ''), '%H:%M:%S')
-                        if t.external_schedule_delay > 0:
-                            start_time = start_time + timedelta(minutes=t.external_schedule_delay)
-                        if len(time_segments) > 2:
-                            end_time = datetime.datetime.strptime(time_segments[2], '%H:%M:%S').time()
-                        else:
-                            end_time = (start_time + datetime.timedelta(minutes=1)).time()
-                        if start_time.time() <= timezone.localtime().time() <= end_time:
-                            register_time_event(t)
-                else:
-                    logger.error('Hue time format in schedule not accounted for. ' + str(time))
-        else:
-            logger.warning('There is no external schedule parser setup for type: ' + Trigger.SOURCE[t.external_schedule.source])
 
 
 def is_anyone_home():

@@ -1,8 +1,16 @@
 from wemo.models import Device
+from jobs.jobs import build_jobs
 from homeauto.event_logs import log_addition, log_change, log_deletion
 import subprocess, logging
 
 logger = logging.getLogger(__name__)
+
+def start():
+    JOBS = (
+        ('Wemo', 'Get Wemo Status and Update Database', False, 20, sync_wemo),
+    )
+    build_jobs(JOBS)
+
 
 def sync_wemo():
     from distutils.spawn import find_executable

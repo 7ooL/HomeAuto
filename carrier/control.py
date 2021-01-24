@@ -1,15 +1,22 @@
+from carrier.models import System, Status, Profile, Activity
+from homeauto.house import register_hvac_event
+from jobs.jobs import build_jobs
 from django.conf import settings
 from django.utils import timezone
 from datetime import datetime
 from api_infinitude.pyInfinitude import Infinitude
-from carrier.models import System, Status, Profile, Activity
-from homeauto.house import register_hvac_event
 import logging, time
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 ZONE = 0
+
+def start():
+    JOBS = (
+        ('Carrier', 'Get Carrier Status and Update Database', False, 20, sync_system),
+    )
+    build_jobs(JOBS)
 
 def connect(system):
     logger.debug('connecting to:' + system.name)

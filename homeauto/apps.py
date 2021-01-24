@@ -8,10 +8,11 @@ class MyAdminConfig(AdminConfig):
 
 logger = logging.getLogger(__name__)
 
-class Config(AppConfig):
+class HomeautoConfig(AppConfig):
     name = 'homeauto'
+    verbose_name = "House Devices and Configuations"
     if 'runserver' in sys.argv:
-
         def ready(self):
-            logger.debug("Starting HomeAuto App")
-
+            logger.debug('Starting '+self.verbose_name+' App')
+            import homeauto.jobs as jobs
+            jobs.start()

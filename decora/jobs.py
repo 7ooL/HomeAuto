@@ -1,4 +1,5 @@
 from decora.models import Switch, Account
+from jobs.jobs import build_jobs
 from api_decora.decora_wifi import DecoraWiFiSession
 from api_decora.decora_wifi.models.person import Person
 from api_decora.decora_wifi.models.residential_account import ResidentialAccount
@@ -8,6 +9,13 @@ from django.core.exceptions import ObjectDoesNotExist
 import logging, traceback
 
 logger = logging.getLogger(__name__)
+
+def start():
+    JOBS = (
+        ('Decora', 'Get Decora Device States and Update Database', False, 10, sync_decora),
+    )
+    build_jobs(JOBS)
+
 
 def sync_decora():
     try:

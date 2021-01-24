@@ -1,12 +1,25 @@
 
 from hue.models import Group, Light, Scene, Bridge, SceneLightstate, Sensor, Schedule
 from hue.actions import get_command
+from jobs.jobs import build_jobs
 from homeauto.event_logs import log_addition, log_change, log_deletion
 from homeauto.house import register_motion_event
 from datetime import datetime
 import logging, pytz, json, traceback
 
 logger = logging.getLogger(__name__)
+
+
+def start():
+    JOBS = (
+        ('Phillips Hue', 'Get Hue Group Settings and Update Database', False, 900, sync_groups),
+        ('Phillips Hue', 'Get Hue Lights States and Update Database', False, 20, sync_lights),
+        ('Phillips Hue', 'Get Hue Sensor States and Update Database', False, 10, sync_sensors),
+        ('Phillips Hue', 'Get Hue Scene Settings and Update Database', False, 1200, sync_scenes),
+        ('Phillips Hue', 'Get Hue Schedules and Update Database', False, 10, sync_schedules),
+    )
+    build_jobs(JOBS)
+
 
 def sync_groups():
     logger.debug('Syncing Hue Groups')

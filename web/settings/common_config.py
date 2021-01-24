@@ -26,9 +26,7 @@ INSTALLED_APPS = [
 
 #    'admin_reorder',
 
-    'homeauto.apps.Config',
     'homeauto.apps.MyAdminConfig',
-#    'django.contrib.admin',
     'django_apscheduler',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -36,16 +34,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'test_job.apps.Config',
+    'jobs.apps.JobsConfig',
+    'homeauto.apps.HomeautoConfig',
     'watchers.apps.WatchersConfig',
     'vivint.apps.VivintConfig',
     'api_decora',
     'decora.apps.DecorasConfig',
-    'jobs.apps.JobsConfig',
-
-    'wemo',
-    'hue',
-    'carrier',
+    'wemo.apps.WemosConfig',
+    'hue.apps.HuesConfig',
+    'carrier.apps.CarrierConfig',
 
 ]
 
