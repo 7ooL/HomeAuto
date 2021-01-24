@@ -33,14 +33,14 @@ admin.site.register(Group, GroupAdmin)
 
 
 def enable(modeladmin, request, queryset):
-    for obj in  queryset:
-        obj.enable=True
+    for obj in queryset:
+        obj.enabled=True
         obj.save()
 enable.short_description = "Enable Selected"
 
 def disable(modeladmin, request, queryset):
     for obj in  queryset:
-        obj.enable=False
+        obj.enabled=False
         obj.save()
 disable.short_description = "Disable Selected"
 
