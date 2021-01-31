@@ -2,9 +2,56 @@ from api_vivint.pyvivintsky.vivint_sky import VivintSky
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import admin
 from vivint.models import Panel, Device, Account
-import asyncio, logging, warnings, time
-
+from jobs.jobs import build_jobs
+import asyncio, logging, warnings, time, multiprocessing, traceback, aiohttp
 logger = logging.getLogger(__name__)
+
+def start():
+    JOBS = (
+        ('Vivint', 'Get Vivint Device Status and Update Database', False, 120, sync_vivint_sensors),
+    )
+    build_jobs(JOBS)
+    start_live_events()
+
+def start_live_events():
+    try:
+        vivintAcct = Account.objects.get(pk=1)
+    except ObjectDoesNotExist as e:
+        logger.error(e)
+    except:
+        logger.error("Error:"+ str(traceback.format_exc()))
+    else:
+        if vivintAcct.pubnub:
+            warnings.filterwarnings('ignore')
+            session = VivintSky(vivintAcct.vivint_username, vivintAcct.vivint_password)
+            try:
+                asyncio.run(session.login())
+            except aiohttp.ClientResponseError as e:
+                logger.error(e)
+            except:
+                logger.error("Error:"+ str(traceback.format_exc()))
+            else:
+                asyncio.run(session.connect_panel())
+                asyncio.run(session.connect_pubnub())
+                logger.debug("Session Expires: "+str(session.get_session()['expires']))
+                process = multiprocessing.Process(target=keep_alive, args=(session,), name="Vivint")
+                process.start()
+        else:
+            logger.warning("Vivint live events are disabled")
+
+def keep_alive(session):
+    try:
+        alive = True
+        while alive:
+            if session.session_valid():
+                time.sleep(5)
+            else:
+                alive = False
+        session.disconnect()
+        start_live_events()
+    except KeyboardInterrupt:
+        logger.error('Vivint Stopped.')
+
 
 # this is a manual update of devices and not what is received from the pubnub feed
 def sync_vivint_sensors():

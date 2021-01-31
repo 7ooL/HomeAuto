@@ -11,3 +11,8 @@ class WemoAdmin(admin.ModelAdmin):
 
 admin.site.register(wemo.Device, WemoAdmin)
 
+class WemoAccountAdmin(admin.ModelAdmin):
+    list_display = ('user',)
+
+admin.site.register(wemo.Account, WemoAccountAdmin)
+

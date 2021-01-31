@@ -98,7 +98,7 @@ LOGGING = {
         },
         'vivint': {
             'handlers': ['file', 'console'],
-            'level': 'INFO',
+            'level': 'DEBUG',
         },
         'carrier': {
             'handlers': ['file', 'console'],
@@ -110,7 +110,7 @@ LOGGING = {
         },
         'api_vivint': {
             'handlers': ['file', 'console'],
-            'level': 'INFO',
+            'level': 'DEBUG',
         },
         'api_decora': {
             'handlers': ['file', 'console'],

@@ -26,7 +26,7 @@ def start():
         ('HomeAuto', 'Search Devices for Locks and Update Database', False, 60, find_locks_job),
         ('HomeAuto', 'Search Devices for Motion Dectors and Update Database', False, 60, find_motion_detectors_job),
         ('HomeAuto', 'Search Devices for Lights and Update Database', False, 60, find_lights_job),
-        ('HomeAuto', 'Evaluate Time Bases Trigger', False, 10, check_time_triggers),
+        ('HomeAuto', 'Evaluate Time Based Triggers', False, 10, check_time_triggers),
     )
     build_jobs(JOBS)
 

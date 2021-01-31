@@ -3,21 +3,20 @@ from apscheduler.executors.pool import ProcessPoolExecutor, ThreadPoolExecutor
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django_apscheduler.jobstores import register_events, register_job, DjangoJobStore
+from django_apscheduler.models import DjangoJobExecution
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
 from jobs.models import Job, Command
 from jobs.models import Group as CommandGroup
 
-import logging
+import logging, time
 
 logger = logging.getLogger(__name__)
 SCHEDULER = BackgroundScheduler(settings.SCHEDULER_CONFIG)
 register_events(SCHEDULER)
 
 def start():
-    SCHEDULER.remove_all_jobs()
-    SCHEDULER.print_jobs()
     if not SCHEDULER.running:
         SCHEDULER.start()
 
@@ -68,9 +67,13 @@ def receive_job_update(sender, instance, **kwargs):
 def update_job(job):
     existingJob = SCHEDULER.get_job(job.command)
     if job.enabled:
-        SCHEDULER.reschedule_job((job.command), trigger='interval', seconds=(job.interval))
-        existingJob.resume()
-        logger.info('Updating ' + str(job.command) + ' Service, interval='+str(job.interval))
+        try:
+            SCHEDULER.reschedule_job((job.command), trigger='interval', seconds=(job.interval))
+            existingJob.resume()
+            logger.info('Updating ' + str(job.command) + ' Service, interval='+str(job.interval))
+        except:
+            SCHEDULER.remove_job(job.command)
+            logger.info("Removing old job: "+str(job.command))
     else:
         existingJob.pause()
         logger.info('Paused the job for ' + str(job.command))
@@ -95,3 +98,9 @@ def create_job(job, func):
         if not job.enabled:
             j.pause()
         logger.warning('Job has been created for command: ' + str(job.command))
+
+#def cleanup_job_executions():
+    # remove all job executoions that are more than a week old
+#    ts = time.time()
+
+#    for dje in DjangoJobExecution.objects.get(status='Executed', finished=
