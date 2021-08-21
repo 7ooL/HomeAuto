@@ -24,6 +24,10 @@ def connect(system):
     hvacPort = system.port
     hvacFile = str(Path(__file__).parent.parent.absolute())+'/api_infinitude/' + str(hvacIP) + '_' + str(hvacPort) + '-file.json'
     hvacStatus = str(Path(__file__).parent.parent.absolute())+'/api_infinitude/' + str(hvacIP) + '_' + str(hvacPort) + '-status.json'
+    f = open(hvacFile, 'a+')  # open file in append mode
+    f.close()
+    f = open(hvacStatus, 'a+')  # open file in append mode
+    f.close()
     return Infinitude(hvacIP, hvacPort, hvacFile, hvacStatus)
 
 

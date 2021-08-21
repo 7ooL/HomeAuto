@@ -79,12 +79,56 @@ class HouseScheduleAdmin(admin.ModelAdmin):
     list_filter = ('source', 'source_type')
     search_fields = ('name','source', 'source_type')
     actions = [enable, disable]
+
+
+
+from django import forms
+
+class TriggerForm(forms.ModelForm):
+    class Meta:
+        model = house.Trigger
+        fields = ('name', 'enabled', 'trigger', 'lock')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+#        self.fields['city'].queryset = City.objects.none()
+
+"""
+    trigger = models.CharField(max_length=60,choices=TRIGGER_TYPES, default=DEFAULT)
+    motion_detector = models.OneToOneField(HouseMotionDetector, on_delete=models.CASCADE, blank=True, null=True)
+    sensor = models.OneToOneField(HouseSensor, on_delete=models.CASCADE, blank=True, null=True)
+    lock = models.OneToOneField(HouseLock, on_delete=models.CASCADE, blank=True, null=True)
+    window_start = models.TimeField(default=timezone.now)
+    window_end = models.TimeField(default=timezone.now)
+    external_schedule =  models.ForeignKey(HouseSchedule, on_delete=models.CASCADE, blank=True, null=True)
+    external_schedule_delay = models.IntegerField(default=-1, verbose_name='Delay behind external schedule (minutes)')
+    people =  models.ManyToManyField(Person, blank=True)
+    people_has_left = models.BooleanField(default=False)
+    people_has_arrived = models.BooleanField(default=False)
+    security_panel = models.ForeignKey(Panel, on_delete=models.CASCADE, blank=True, null=True)
+    security_armed_to = models.BooleanField(default=False, verbose_name="When person sets state to")
+    security_changed_to = models.BooleanField(default=False, verbose_name="When state changes to")
+    security_armed_state =  models.CharField(max_length=60,choices=Common.ARM_STATES, default=Common.DISARMED, verbose_name="Armed State")
+    hvac_unit = models.ManyToManyField(System, blank=True)
+    hvac_profile = models.CharField(max_length=60,choices=Common.HVAC_PROFILES, default=Common.HOME)
+    hvac_value = models.IntegerField(default=0)
+    hvac_hold = models.BooleanField(default=False)
+    hvac_heat_mode = models.CharField(max_length=60,choices=Common.HVAC_HEAT_MODES, default=Common.OFF)
+    event = models.OneToOneField(CustomEvent, on_delete=models.CASCADE, blank=True, null=True)
+
+
+"""
+
+
+
 class TriggerAdmin(admin.ModelAdmin):
     search_fields = ('name','trigger')
     list_display = ('name', 'enabled', 'trigger', 'id')
     list_filter = ('enabled', 'trigger')
-    change_form_template = 'trigger_edit.html'
+#    change_form_template = 'trigger_edit.html'
     actions = [enable, disable]
+#    form = TriggerForm
+
 class ActionAdmin(admin.ModelAdmin):
     search_fields = ['name']
     list_display = ('name', 'enabled', 'action', 'last_action_time')

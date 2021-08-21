@@ -424,7 +424,7 @@ def execute_actions(n_id):
     for action in nug.actions.all():
         if action.enabled:
             if action.action_grace_period <= 0 or timezone.localtime() - action.last_action_time > timedelta(minutes=(int(action.action_grace_period))):
-                run_action(action)
+                run_action(action,nug)
                 logger.debug("execute_actions:{"+action.name+"}{"+str(action.id)+"}{"+action.action+"}{"+str(action.enabled)+"}{"+nug.name+"}{"+str(nug.id)+"}")
             else:
                 logger.debug('Not running '+action.name+' as it is within the cool down period of ' + str(action.action_grace_period))
@@ -432,7 +432,7 @@ def execute_actions(n_id):
             logger.debug("execute_actions:{"+action.name+"}{"+str(action.id)+"}{"+action.action+"}{"+str(action.enabled)+"}{"+nug.name+"}{"+str(nug.id)+"}")
 
 
-def run_action(action):
+def run_action(action, nug):
     logger.debug("Attempting to run "+action.name)
     if action.action == action.PLAY_SCENE:
         scenes = action.scenes.all()
@@ -443,7 +443,7 @@ def run_action(action):
                 HueAction.play_scene(s)
                 # reset scene states to fast
                 HueAction.set_scene_trans_time(s,3)
-                update_last_run(action)
+                update_last_run(action, nug)
         else:
             logger.error("run_action:{"+action.name+"}{failed}{Query set is empty}")
     elif action.action == action.PLAY_RANDOM_SCENE:
@@ -455,7 +455,7 @@ def run_action(action):
             HueAction.play_scene(s)
             # reset scene states to fast
             HueAction.set_scene_trans_time(s,3)
-            update_last_run(action)
+            update_last_run(action, nug)
         else:
             logger.error("run_action:{"+action.name+"}{failed}{Query set is empty}")
     elif action.action == action.FLASH_SCENE:
@@ -463,7 +463,7 @@ def run_action(action):
         if scenes:
             for scene in scenes:
                 HueAction.flash_scene(scene)
-                update_last_run(action)
+                update_last_run(action, nug)
 
         else:
             logger.error("run_action:{"+action.name+"}{failed}{Query set is empty}")
@@ -474,22 +474,22 @@ def run_action(action):
                 if light.source == 1:
                     if light.source_type == 0:
                         HueAction.turn_on_light(Light.objects.get(id=(light.source_id)))
-                        update_last_run(action)
+                        update_last_run(action, nug)
                     elif light.source_type == 1:
                         HueAction.turn_on_group(Group.objects.get(id=(light.source_id)))
-                        update_last_run(action)
+                        update_last_run(action, nug)
                     else:
                         logger.error("run_action:{"+action.name+"}{failed}{Unkown source_type "+str(light.source.type)+"}")
                 elif light.source == 2:
                     if light.source_type == 4:
                         if WemoAction.turn_on_light(Wemo.objects.get(id=(light.source_id))):
-                            update_last_run(action)
+                            update_last_run(action, nug)
                     else:
                         logger.error("run_action:{"+action.name+"}{failed}{Unkown source_type "+str(light.source.type)+"}")
                 elif light.source == 3:
                     if light.source_type == 3:
                         if DecoraAction.turn_on_light(Switch.objects.get(id=(light.source_id))):
-                            update_last_run(action)
+                            update_last_run(action, nug)
                     else:
                         logger.error("run_action:{"+action.name+"}{failed}{Unkown source_type "+str(light.source.type)+"}")
                 else:
@@ -505,19 +505,19 @@ def run_action(action):
                         HueAction.turn_off_light(Light.objects.get(id=(light.source_id)))
                     elif light.source_type == 1: # Group
                         HueAction.turn_off_group(Group.objects.get(id=(light.source_id)))
-                        update_last_run(action)
+                        update_last_run(action, nug)
                     else:
                         logger.error("run_action:{"+action.name+"}{failed}{Unkown source_type "+str(light.source.type)+"}")
                 elif light.source == 2: # 2 wemo
                     if light.source_type == 4: # Plug
                         if WemoAction.turn_off_light(Wemo.objects.get(id=(light.source_id))):
-                            update_last_run(action)
+                            update_last_run(action, nug)
                     else:
                         logger.error("run_action:{"+action.name+"}{failed}{Unkown source_type "+str(light.source.type)+"}")
                 elif light.source == 3: # 3 decora
                     if light.source_type == 3: # swicth 3
                         if DecoraAction.turn_off_light(Switch.objects.get(id=(light.source_id))):
-                            update_last_run(action)
+                            update_last_run(action, nug)
                     else:
                         logger.error("run_action:{"+action.name+"}{failed}{Unkown source_type "+str(light.source)+"}")
                 else:
@@ -531,7 +531,7 @@ def run_action(action):
                 if light.source == 1:
                     if light.source_type == 1:
                         HueAction.blink_group(Group.objects.get(id=(light.source_id)))
-                        update_last_run(action)
+                        update_last_run(action, nug)
                     else:
                         logger.error("run_action:{"+action.name+"}{failed}{Unkown source_type "+str(light.source)+"}")
                 else:
@@ -543,7 +543,7 @@ def run_action(action):
         if people:
             for person in people:
                 send_text(person.text_address, action.text_message)
-                update_last_run(action)
+                update_last_run(action, nug)
         else:
             logger.error("run_action:{"+action.name+"}{failed}{Query set is empty}")
     elif action.action == action.HVAC_SET_ACTIVITY:
@@ -556,7 +556,7 @@ def run_action(action):
             for p in people:
                 p.is_home = False
                 p.save()
-                update_last_run(action)
+                update_last_run(action, nug)
         else:
             logger.error("run_action:{"+action.name+"}{failed}{Query set is empty}")
     elif action.action == action.PEOPLE_ARRIVE:
@@ -565,7 +565,7 @@ def run_action(action):
             for p in people:
                 p.is_home = True
                 p.save()
-                update_last_run(action)
+                update_last_run(action, nug)
         else:
             logger.error("run_action:{"+action.name+"}{failed}{Query set is empty}")
     elif action.action == action.DISABLE_TRIGGER:
@@ -576,7 +576,7 @@ def run_action(action):
             for t in triggers:
                 t.enabled = False
                 t.save()
-                update_last_run(action)
+                update_last_run(action, nug)
     elif action.action == action.ENABLE_TRIGGER:
         triggers = action.triggers.all()
         if triggers.count() == 0:
@@ -585,14 +585,14 @@ def run_action(action):
             for t in triggers:
                 t.enabled = True
                 t.save()
-                update_last_run(action)
+                update_last_run(action, nug)
     else:
         logger.error("run_action:{"+action.name+"}{failed}{No action code has been developed for this type}")
 
 
-def update_last_run(action):
+def update_last_run(action, nug):
     Action.objects.filter(id=(action.id)).update(last_action_time=(timezone.localtime()))
-    logger.info("run_action:{"+action.name+"}{success}")
+    logger.info("run_action:{"+nug.name+"}{"+action.name+"}{success}")
 
 def send_text(phone, message):
     logger.debug('attempting to send text ' + message)

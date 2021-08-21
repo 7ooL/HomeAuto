@@ -58,7 +58,7 @@ class Switch(Common):
     linkData = models.CharField(max_length=30, blank=True, null=True)
     loadType = models.IntegerField(default=0)
     isRandomEnabled = models.BooleanField(default=False)
-    ota = models.BooleanField(default=False)
+    ota = models.BooleanField(default=False, null=True)
     otaStatus = models.CharField(max_length=30, blank=True, null=True)
     connected = models.BooleanField(default=False)
     allowLocalCommands = models.CharField(max_length=30, blank=True, null=True)

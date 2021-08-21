@@ -25,6 +25,7 @@ def start_live_events():
             warnings.filterwarnings('ignore')
             session = VivintSky(vivintAcct.vivint_username, vivintAcct.vivint_password)
             try:
+                logger.debug("Session login run")
                 asyncio.run(session.login())
             except aiohttp.ClientResponseError as e:
                 logger.error(e)
@@ -47,10 +48,11 @@ def keep_alive(session):
                 time.sleep(5)
             else:
                 alive = False
+                logger.debug("Vivint session for Live Events is dead")
         session.disconnect()
         start_live_events()
     except KeyboardInterrupt:
-        logger.error('Vivint Stopped.')
+        logger.error('Vivint session stopped.')
 
 
 # this is a manual update of devices and not what is received from the pubnub feed
