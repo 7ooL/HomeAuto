@@ -167,7 +167,7 @@ def sync_system():
                 else:
                     data = {}
                     current_mode = System.objects.get(name=(system.name)).mode
-                    data['mode'] = hvac.get_mode()
+                    data['mode'] = hvac.get_current_mode()
                     if current_mode != data['mode']:
                         (System.objects.filter(name=(system.name)).update)(**data)
                         register_hvac_event(system.name, 'mode', current_mode, data['mode'])
