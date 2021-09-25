@@ -13,6 +13,6 @@ class HomeautoConfig(AppConfig):
     verbose_name = "House Devices and Configuations"
     if 'runserver' in sys.argv:
         def ready(self):
-            logger.debug('Starting '+self.verbose_name+' App')
+            logger.info('Starting '+self.verbose_name+' App')
             import homeauto.jobs as jobs
             jobs.start()

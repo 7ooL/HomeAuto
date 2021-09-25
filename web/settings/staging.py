@@ -40,7 +40,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'simple': {
-            '()': 'djangocolors_formatter.DjangoColorsFormatter',
+#            '()': 'djangocolors_formatter.DjangoColorsFormatter',
             'format': '{levelname} {module} {funcName} : {message}',
             'style': '{',
         },

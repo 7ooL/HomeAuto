@@ -33,7 +33,7 @@ LOGGING = {
     'formatters': {
         'simple': {
 #            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            '()': 'djangocolors_formatter.DjangoColorsFormatter',
+#            '()': 'djangocolors_formatter.DjangoColorsFormatter',
             'format': '{levelname} {module} {funcName} : {message}',
             'style': '{',
         },
@@ -104,7 +104,7 @@ LOGGING = {
             'handlers': ['file', 'console'],
             'level': 'INFO',
         },
-        'api_infinitude.pyInfinitude': {
+        'api_infinitude': {
             'handlers': ['file', 'console'],
             'level': 'INFO',
         },

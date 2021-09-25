@@ -1,0 +1,12 @@
+[Unit]
+Description=home-auto web application
+After=network.target
+
+[Service]
+User=ha
+Group=ha
+ExecStart=/usr/bin/python3 /home/ha/web_home_auto/manage.py runserver 0.0.0.0:8080 --noreload --settings=web.settings.staging
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
